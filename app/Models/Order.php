@@ -11,14 +11,15 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
-        'product_id',
+        'rider_id',
         'order_code',
         'total_amount',
         'payment_method',
         'delivery_address',
         'status',
-        'delivery_date',
-        'delivered_on_time',
+        'delivery_time',
+        'delivered_at',
+        'delivered_status',
         'notes',
     ];
 
@@ -27,13 +28,14 @@ class Order extends Model
         return $this->hasOne(Order::class);
     }
 
-    public function product()
-    {
-        return $this->belongsTo(Product::class);
-    }
-     public function user()
+    public function rider()
     {
         return $this->belongsTo(User::class);
+    }
+
+     public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function items()
@@ -42,6 +44,8 @@ class Order extends Model
     }
 
 
-
-
 }
+
+
+
+

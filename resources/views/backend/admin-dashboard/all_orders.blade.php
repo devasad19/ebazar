@@ -13,7 +13,7 @@
 
         <!-- Content -->
         <section class="bg-white p-6 rounded-2xl shadow mx-6 my-6">
-            <h2 class="text-2xl font-bold text-green-700 mb-6">📦 সব অর্ডার</h2>
+            <h2 class="text-2xl font-bold text-green-700 mb-6">📦 সব অর্ডার (লাইভ)</h2>
 
             <!-- Filter -->
             <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
@@ -40,61 +40,13 @@
             </div>
  
             <!-- Orders Table -->
-            <div class="overflow-x-auto">
-                <table class="min-w-full text-sm text-gray-700 border border-gray-200">
-                    <thead class="bg-green-600 text-white">
-                        <tr>
-                            <th class="px-4 py-3 border">#</th>
-                            <th class="px-4 py-3 border">Order ID</th>
-                            <th class="px-4 py-3 border">Customer</th>
-                            <th class="px-4 py-3 border">Total</th>
-                            <th class="px-4 py-3 border">Status</th>
-                            <th class="px-4 py-3 border">Date</th>
-                            <th class="px-4 py-3 border text-center">Options</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($orders as $key => $order)
-                        <tr class="hover:bg-gray-50 border-b">
-                            <td class="px-4 py-3 border">{{ $key+1 }}</td>
-                            <td class="px-4 py-3 border font-semibold text-gray-800">#{{ $order->id }}</td>
-                            <td class="px-4 py-3 border">{{ $order->customer_name }}</td>
-                            <td class="px-4 py-3 border">৳{{ number_format($order->total, 2) }}</td>
-                            <td class="px-4 py-3 border">
-                                <span class="px-2 py-1 rounded-full text-xs font-semibold 
-                                    {{ $order->status == 'Completed' ? 'bg-green-100 text-green-700' : ($order->status == 'Pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700') }}">
-                                    {{ $order->status }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 border">{{ $order->created_at->format('d M, Y') }}</td>
-                            <td class="px-4 py-3 border text-center">
-                                <button 
-                                    class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-xs"
-                                    onclick="showOrderDetails({{ $order->id }})">
-                                    Details
-                                </button>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+        <!-- Recent Orders -->
+            
+            <div id="orderBoard" class="grid grid-cols-1 md:grid-cols-1 gap-6"></div>
+           
         </section>
 
-        <!-- Order Details Modal -->
-        <div id="orderModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-            <div class="bg-white w-full max-w-2xl p-6 rounded-xl shadow-lg relative">
-                <h3 class="text-xl font-bold text-green-700 mb-4">🧾 অর্ডার ডিটেইলস</h3>
-                <div id="orderDetailsContent">
-                    <!-- AJAX data load here -->
-                    <p class="text-gray-600">Loading...</p>
-                </div>
-
-                <button onclick="closeOrderModal()" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">
-                    ✖
-                </button>
-            </div>
-        </div>
+ 
 
     </div>
 </div>
@@ -102,33 +54,205 @@
 
 @section('scripts')
 <script>
-function showOrderDetails(orderId) {
-    const modal = document.getElementById('orderModal');
-    const content = document.getElementById('orderDetailsContent');
-    modal.classList.remove('hidden');
-    content.innerHTML = `<p class="text-gray-600">Loading details...</p>`;
+function loadOrders2() {
+    $.get("{{ route('admin.orders.live') }}", function(data){
+        data.orders.forEach(order => {
+            if (!$(`#orderBoard .order-item[data-id="${order.id}"]`).length) {
 
-    fetch(`/admin/orders/${orderId}`)
-        .then(res => res.json())
-        .then(data => {
-            content.innerHTML = `
-                <div class="space-y-2">
-                    <p><strong>Customer:</strong> ${data.customer_name}</p>
-                    <p><strong>Phone:</strong> ${data.phone}</p>
-                    <p><strong>Address:</strong> ${data.address}</p>
-                    <p><strong>Total:</strong> ৳${data.total}</p>
-                    <p><strong>Status:</strong> ${data.status}</p>
-                </div>
-                <h4 class="mt-4 font-semibold text-gray-700">🛒 Items:</h4>
-                <ul class="list-disc ml-6">
-                    ${data.items.map(item => `<li>${item.name} - ${item.quantity} × ৳${item.price}</li>`).join('')}
-                </ul>
-            `;
+                // 🧮 Calculate total by unit
+                    // 🧮 Calculate totals with product names (except কেজি)
+                    let totals = {
+                        'কেজি': 0,
+                        'পিস': [],
+                        'ডজন': [],
+                        'লিটার': [],
+                        'প্যাকেট': []
+                    };
+
+                    (order.items || []).forEach(i => {
+                        const unit = i.product?.unit?.trim();
+                        const qty = parseFloat(i.quantity) || 0;
+                        const name = i.product?.name ?? 'অজানা পণ্য';
+
+                        if (!unit) return;
+
+                        if (unit === 'কেজি') {
+                            totals['কেজি'] += qty; // keep kg total
+                        } else if (totals.hasOwnProperty(unit)) {
+                            totals[unit].push(`${name} (${qty})`); // save product name + qty
+                        }
+                    });
+
+                    // Build display string
+                    let totalTextParts = [];
+
+                    // কেজি প্রথম
+                    if (totals['কেজি'] > 0) {
+                        totalTextParts.push(`${totals['কেজি'].toFixed(1)} কেজি`);
+                    }
+
+                    // অন্য units
+                    ['পিস','ডজন','লিটার','প্যাকেট'].forEach(unit => {
+                        if (totals[unit].length > 0) {
+                            totalTextParts.push(totals[unit].join(', ') + ` ${unit}`);
+                        }
+                    });
+
+                    let totalText = totalTextParts.join(' + ') || '-';
+
+                $('#orderBoard').append(`
+                    <div class="w-full">
+                        <div class="bg-white p-5 rounded-2xl shadow-md hover:shadow-lg transition order-item border border-gray-100 w-full" data-id="${order.id}">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+
+                                <!-- 🧍‍♂️ Customer Info -->
+                                <div>
+                                    <h4 class="text-lg font-semibold text-green-700 mb-1">
+                                        ${order.user?.name ?? 'অজানা ক্রেতা'}
+                                    </h4>
+                                    <p class="text-sm text-gray-600">পিতার নামঃ ${order.user?.father_name ?? '-'}</p>
+                                    <p class="text-sm text-gray-600">📞 ${order.user?.phone ?? '-'}</p>
+                                </div>
+
+                                <!-- 📦 Order Info -->
+                                <div class="text-gray-700">
+                                    <p><strong>পণ্যঃ</strong> ${order.items?.length ?? 0} টি</p>
+                                    <p><strong>মোটঃ</strong> <span class="text-green-700 font-semibold">৳${order.total_amount}</span></p>
+                                    <p><strong>ঠিকানাঃ</strong> ${order.delivery_address ?? '-'}</p>
+                                </div>
+
+                                <!-- ⏰ Time & Action -->
+                                <div class="flex flex-col justify-between text-left md:text-right">
+                                    <p class="text-sm text-gray-500 mb-3">
+                                        <strong>অর্ডার সময়ঃ</strong> ${new Date(order.created_at).toLocaleString('bn-BD')}
+                                    </p>
+                                    <button class="acceptBtn bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg transition w-full md:w-auto">
+                                        ✅ গ্রহণ করুন
+                                    </button>
+                                </div>
+                                </div>
+                                <p class="text-sm text-red-500 mt-3"><strong>মোট পরিমাণঃ</strong> ${totalText}</p>
+                        </div>
+                    </div>
+                `);
+            }
         });
+    });
 }
 
-function closeOrderModal() {
-    document.getElementById('orderModal').classList.add('hidden');
+
+function loadOrders() {
+    $.get("{{ route('admin.orders.live') }}", function(data){
+        $('#orderBoard').empty(); // পুরনো কার্ড ক্লিয়ার
+
+        data.orders.forEach(order => {
+            $('#orderBoard').append(renderOrderCard(order));
+        });
+    });
 }
+ 
+setInterval(loadOrders, 5000);
+loadOrders();
+ 
+
+
+
+
+
+
+
+function renderOrderCard(order) {
+    // ✅ মোট পরিমাণ হিসাব (আগের মতো)
+    let totals = { 'কেজি': 0, 'পিস': [], 'ডজন': [], 'লিটার': [], 'প্যাকেট': [] };
+    (order.items || []).forEach(i => {
+        const unit = i.product?.unit?.trim();
+        const qty = parseFloat(i.quantity) || 0;
+        const name = i.product?.name ?? 'অজানা পণ্য';
+        if (!unit) return;
+        if (unit === 'কেজি') totals['কেজি'] += qty;
+        else if (totals.hasOwnProperty(unit)) totals[unit].push(`${name} (${qty})`);
+    });
+
+    let totalTextParts = [];
+    if (totals['কেজি'] > 0) totalTextParts.push(`${totals['কেজি'].toFixed(1)} কেজি`);
+    ['পিস','ডজন','লিটার','প্যাকেট'].forEach(unit => {
+        if (totals[unit].length > 0) totalTextParts.push(totals[unit].join(', ') + ` ${unit}`);
+    });
+    let totalText = totalTextParts.join(' + ') || '-';
+
+    // ✅ Status অনুযায়ী বাটন
+    let buttonHTML = '';
+    if (order.status === 'delivered') {
+        buttonHTML = `
+            <button class="bg-gray-600 text-white font-semibold px-6 py-2 rounded-lg w-full md:w-auto" disabled>
+                ✅ ডেলিভারি সম্পন্ন হয়েছে
+            </button>
+        `;
+    } else if (order.status === 'accepted') { 
+        buttonHTML = `
+            <button class="deliverBtn bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2 rounded-lg transition w-full md:w-auto" data-id="${order.id}">
+                🚚 অর্ডার গৃহীত হয়েছে
+            </button>
+        `;
+    } else {
+        buttonHTML = `
+            <button class="deliverBtn bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg transition w-full md:w-auto" data-id="${order.id}">
+                🚚 অর্ডার পেন্ডিং
+            </button>
+        `;
+    }
+
+console.log(order.rider?.name);
+
+    
+    // ✅ Delivery Info
+    let deliveryInfo = '';
+    if (order.status === 'delivered' || order.status === 'accepted') {
+        const riderName = order.rider?.name ?? '';
+
+        let statusText = '';
+        if(order.delivered_status === 'on_time'){
+            statusText = `<span class='text-green-600 font-semibold'>সময়ে ডেলিভারি</span>`;
+        }else if(order.delivered_status === 'late'){
+             statusText = `<span class='text-red-600 font-semibold'>বিলম্বে ডেলিভারি</span>`;
+        }
+
+        deliveryInfo = `
+            <div class="mt-3 text-sm bg-indigo-100 text-gray-600 border-t p-2 rounded-md flex items-center justify-between">
+                <p>🚴 <strong>রাইডারঃ</strong> ${riderName}</p>
+                <p>🕓 <strong>ডেলিভারি সময়ঃ</strong> ${order.delivered_at?new Date(order.delivered_at).toLocaleString('bn-BD'): ''}</p>
+                <p>${statusText}</p>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="bg-white p-5 rounded-2xl shadow-md hover:shadow-lg border order-item w-full mb-4" data-id="${order.id}">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <h4 class="text-lg font-semibold text-green-700">${order.user?.name ?? 'অজানা ক্রেতা'}</h4>
+                                    <p class="text-sm text-gray-600">পিতার নামঃ ${order.user?.father_name ?? '-'}</p>
+                    <p>📞 ${order.user?.phone ?? '-'}</p>
+                </div>
+                <div>
+                    <p><strong>পণ্যঃ</strong> ${order.items?.length ?? 0} টি</p>
+                    <p><strong>মোটঃ</strong> ৳${order.total_amount}</p>
+                                    <p><strong>ঠিকানাঃ</strong> ${order.delivery_address ?? '-'}</p>
+                </div>
+                <div class="text-right">
+                    <p><strong>অর্ডার সময়ঃ</strong> ${new Date(order.created_at).toLocaleString('bn-BD')}</p>
+                    ${buttonHTML}
+                </div>
+            </div>
+            <p class="text-sm text-red-500 my-3"><strong>মোট পরিমাণঃ</strong> ${totalText}</p>
+            ${deliveryInfo}
+        </div>
+    `;
+}
+
+
+
+
+ 
 </script>
 @endsection

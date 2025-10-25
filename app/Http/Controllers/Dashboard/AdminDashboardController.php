@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Bazar;
-use App\Models\Rider;
+use App\Models\Order;
 
 class AdminDashboardController extends Controller
 {
@@ -38,51 +38,21 @@ class AdminDashboardController extends Controller
 
     public function adminAllOrders(){
 
-        $data['orders'] = collect([
-        (object)[
-            'id' => 101,
-            'customer_name' => 'মোঃ আহাদ আলী',
-            'phone' => '০১২৪৫৬৭৮৯০',
-            'address' => 'রামাকানা, দুল্লা বাজার, চেচুয়া',
-            'total' => 450,
-            'status' => 'Pending',
-            'created_at' => now()->subDays(1),
-            'items' => collect([
-                (object)['name' => 'বেগুন', 'quantity' => 2, 'price' => 60],
-                (object)['name' => 'টমেটো', 'quantity' => 3, 'price' => 50]
-            ])
-        ],
-        (object)[
-            'id' => 102,
-            'customer_name' => 'সুমাইয়া রহমান',
-            'phone' => '০১৭১২৩৪৫৬৭৮',
-            'address' => 'মোহাম্মদপুর, ঢাকা',
-            'total' => 320,
-            'status' => 'Completed',
-            'created_at' => now()->subDays(2),
-            'items' => collect([
-                (object)['name' => 'পটল', 'quantity' => 5, 'price' => 40],
-                (object)['name' => 'আলু', 'quantity' => 2, 'price' => 60]
-            ])
-        ],
-        (object)[
-            'id' => 103,
-            'customer_name' => 'মোঃ কামরুল',
-            'phone' => '০১৯৮৭৬৫৪৩২১',
-            'address' => 'নিউ মার্কেট, ঢাকা',
-            'total' => 380,
-            'status' => 'Cancelled',
-            'created_at' => now()->subDays(3),
-            'items' => collect([
-                (object)['name' => 'টমেটো', 'quantity' => 4, 'price' => 50],
-                (object)['name' => 'কলা', 'quantity' => 2, 'price' => 40]
-            ])
-        ]
-    ]);
-
+        $data['orders'] = [];
  
         return view('backend.admin-dashboard.all_orders', $data);
     }
+
+
+    public function adminLiveOrders()
+    {
+        $orders = Order::with(['user', 'rider', 'items.product'])->latest()->get();
+
+        return response()->json(['orders' => $orders]);
+    }
+
+
+
 
 
     public function adminRiderList(){

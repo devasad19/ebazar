@@ -171,12 +171,47 @@ public function productdestroy($id)
     // ✅ Show Order Board Page
     public function riderOrders()
     {
-        // শুধুমাত্র pending orders দেখানো হবে
-        $orders = Order::where('status', 'pending')->orderBy('created_at', 'desc')->get();
+        // rider er accepted orders দেখানো হবে
+        $orders = Order::where('rider_id', auth()->id())
+            ->whereIn('status', ['accepted', 'delivered'])
+            ->orderBy('created_at', 'desc')
+            ->get();
 
+ 
         return view('backend.riders.rider_orders', compact('orders'));
     }
    
+// app/Http/Controllers/RiderOrderController.php
+
+public function markDelivered(Request $request, $id)
+{
+    $order = Order::where('id', $id)
+        ->where('rider_id', auth()->id())
+        ->firstOrFail();
+
+    $order->status = 'delivered';
+    $order->delivered_at = now();
+
+    // 🔹 Compare delivered_at vs delivery_time
+    if ($order->delivery_time) {
+        $expectedTime = \Carbon\Carbon::parse($order->created_at)->addMinutes($order->delivery_time);
+        $order->delivered_status = now()->lessThanOrEqualTo($expectedTime) ? 'on_time' : 'late';
+    } else {
+        $order->delivered_status = '';
+    }
+
+    $order->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => '✅ অর্ডার সফলভাবে সম্পন্ন হয়েছে!',
+        'order_id' => $id,
+        'delivered_status' => $order->delivered_status,
+    ]);
+}
+
+
+
 
 public function pendingOrders()
 {
@@ -193,6 +228,7 @@ public function pendingOrders()
 
     return response()->json(['orders' => $orders]);
 }
+
 
 
     // 🔹 Rider accept order with price update

@@ -57,6 +57,9 @@ Route::get('/rider/orders/pending', [RiderController::class, 'pendingOrders'])->
 
 // Rider accept order
 Route::post('/rider/orders/accept', [RiderController::class, 'acceptOrder'])->name('rider.orders.accept');
+// routes/web.php
+Route::post('/rider/orders/deliver/{id}', [RiderController::class, 'markAsDelivered'])
+    ->name('rider.orders.deliver');
 
 
 
@@ -89,6 +92,7 @@ Route::get('admin/dashboard/settings', [AdminDashboardController::class, 'adminS
 
 Route::get('admin/dashboard/rider/slug', [AdminDashboardController::class, 'riderProfile'])->name('admin.rider.profile');
  
+Route::get('/admin/live/orders', [AdminDashboardController::class, 'adminLiveOrders'])->name('admin.orders.live');
 
 // ========================= backend =================
 Route::get('admin/dashboard/manage-bazar', [BazarController::class, 'adminManageBazar'])->name('admin.manage_bazar');
