@@ -1,90 +1,55 @@
 @extends('apps.dashboard_master')
+
 @section('content')
 <div class="flex min-h-screen bg-gray-50">
-    <!-- 🟢 Sidebar -->
+
+    <!-- Sidebar -->
     @include('backend.patrials.rider_aside')
-  
-    <!-- 🟡 Main Content Area -->
-    <div class="flex-1 flex flex-col p-4">
-        <!-- Top Bar -->
-        <!-- Top Bar -->
-        <header class="bg-white shadow-md py-4 px-6 flex justify-between items-center">
-            <h1 class="text-xl font-bold text-gray-700">ড্যাশবোর্ড</h1>
-            <div class="flex items-center gap-4">
-                <span class="text-gray-600 text-sm hidden sm:block">রাইডার</span>
-                <img src="{{ $rider->user->photo ? url('uploads/riders/'.$rider->user->photo??'') : 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' }}" alt="User" class="w-10 h-10 rounded-full object-cover">
-            </div>
-        </header>
 
-        
-        <!-- 🎁 Offer Notice Card (Dismissible) -->
-<div class="bg-gray-50 min-h-screen py-10">
-    <div class="max-w-7xl mx-auto px-6">
+    <!-- Main Area -->
+    <div class="flex-1 flex flex-col">
 
-        <!-- Rider Welcome Header -->
-        <div class="bg-white shadow rounded-2xl p-6 flex flex-col md:flex-row justify-between items-center mb-8">
-            <div>
-                <h2 class="text-2xl font-bold text-green-700">স্বাগতম, {{ $rider->name ?? 'রাইডার' }} 👋</h2>
-                <p class="text-gray-600 mt-1">আজকের জন্য আপনার কার্যক্রম নিচে দেখুন</p>
-            </div>
+        @include('backend.patrials.top_bar')
 
-            <div class="flex items-center gap-4 mt-4 md:mt-0">
-                <img src="{{ $rider->user->photo ? asset('uploads/riders/'.$rider->user->photo) : 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' }}" 
-                     class="w-16 h-16 rounded-full border-2 border-green-500 object-cover" 
-                     alt="Rider Photo">
+        <!-- Content -->
+        <section class="bg-white p-6 rounded-2xl shadow mx-6 my-6">
+            <h2 class="text-2xl font-bold text-green-700 mb-6">📦 লাইভ অর্ডার বোর্ড</h2>
+
+            <!-- Filter -->
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
+                <div>
+                    <label for="dateFilter" class="text-gray-600 font-semibold mr-2">Filter by:</label>
+                    <select id="dateFilter" class="border px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-400 outline-none">
+                        <option value="today">Today</option>
+                        <option value="yesterday">Yesterday</option>
+                        <option value="last7">Last 7 Days</option>
+                        <option value="last15">Last 15 Days</option>
+                        <option value="1month">1 Month</option>
+                    </select>
+                </div>
 
                 <div>
-                    <p class="text-sm text-gray-700"><strong>ফোন:</strong> {{ $rider->user->phone }}</p>
-                    <p class="text-sm text-gray-700"><strong>যানবাহন:</strong> {{ $rider->vehicle_type ?? 'নির্দিষ্ট নয়' }}</p>
-                    
+                    <label for="sortBy" class="text-gray-600 font-semibold mr-2">Sort by:</label>
+                    <select id="sortBy" class="border px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-400 outline-none">
+                        <option value="total_delivered_desc">Total Delivered (High → Low)</option>
+                        <option value="total_delivered_asc">Total Delivered (Low → High)</option>
+                        <option value="pending_orders_desc">Pending Orders (High → Low)</option>
+                        <option value="pending_orders_asc">Pending Orders (Low → High)</option>
+                    </select>
                 </div>
             </div>
-        </div>
+ 
+            <!-- Orders Table -->
+            <div class="overflow-x-auto">
+                
 
-        <!-- Rider Stats Section -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
-            <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
-                <h3 class="text-gray-500 text-sm mb-2">✅ সম্পন্ন ডেলিভারি</h3>
-                <p class="text-3xl font-bold text-green-600">{{ $rider->total_delivered ?? 0 }}</p>
+ 
+    <div id="orderBoard" class="grid grid-cols-1 md:grid-cols-1 gap-6"></div>
+ 
+ 
+
             </div>
-
-            <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
-                <h3 class="text-gray-500 text-sm mb-2">⏱️ সময়মতো ডেলিভারি</h3>
-                <p class="text-3xl font-bold text-blue-600">{{ $rider->on_time_delivery ?? 0 }}</p>
-            </div>
-
-            <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
-                <h3 class="text-gray-500 text-sm mb-2">📦 চলমান অর্ডার</h3>
-                <p class="text-3xl font-bold text-yellow-600">{{ $rider->pending_orders ?? 0 }}</p>
-            </div>
-
-            <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
-                <h3 class="text-gray-500 text-sm mb-2">❌ বাতিল ডেলিভারি</h3>
-                <p class="text-3xl font-bold text-red-600">{{ $rider->cancel_delivery ?? 0 }}</p>
-            </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="bg-white p-6 rounded-2xl shadow mb-10">
-            <h3 class="text-lg font-semibold text-green-700 mb-4">🚀 দ্রুত কার্যক্রম</h3>
-            <div class="flex flex-wrap gap-4">
-                <a href="{{ route('rider.orders') }}" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">📦 আমার অর্ডারসমূহ</a>
-                <a href="{{ route('rider.products') }}" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">🛒 আমার পণ্য তালিকা</a>
-                <a href="{{ route('rider.earnings') }}" class="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition">💰 আয় দেখুন</a>
-                <a href="{{ route('rider.support') }}" class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">📞 সাপোর্টে যোগাযোগ</a>
-            </div>
-        </div>
-
-        <!-- Recent Orders -->
-        <div class="bg-white p-6 rounded-2xl shadow">
-            <h3 class="text-lg font-semibold text-green-700 mb-4">📋 লাইভ অর্ডার বোর্ড</h3>
-            <div id="orderBoard" class="grid grid-cols-1 md:grid-cols-1 gap-6"></div>
-        </div>
-    </div>
-</div>
-    </div>
-</div>
-
+        </section>
 
 <!-- ✅ Accept Modal -->
 <div id="acceptModal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
@@ -104,11 +69,11 @@
 </div>
 
 
-
-
-
-
+    </div>
+</div>
 @endsection
+
+
 @section('scripts')
 <script>
 function loadOrders() {

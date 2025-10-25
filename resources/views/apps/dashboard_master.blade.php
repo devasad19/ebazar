@@ -36,8 +36,7 @@
       @yield('content')
     </main>
   </div>
-
-  @dd(auth()->id())
+ 
 
   <!-- 🌱 Footer -->
   <footer class="bg-gray-900 text-gray-300 text-center py-4 mt-auto">

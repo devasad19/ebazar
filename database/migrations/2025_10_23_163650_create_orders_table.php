@@ -16,7 +16,7 @@ return new class extends Migration
 
             // ✅ Client & Rider Relationship
             $table->unsignedBigInteger('user_id')->nullable();
-            $table->unsignedBigInteger('product_id')->nullable();
+            $table->unsignedBigInteger('rider_id')->nullable();
 
             // ✅ Order Basic Info
             $table->string('order_code')->unique();
@@ -35,7 +35,7 @@ return new class extends Migration
             $table->timestamps();
 
             // ✅ Foreign Keys (Optional)
-            $table->foreign('product_id')->references('id')->on('products')->onDelete('set null');
+            $table->foreign('rider_id')->references('id')->on('users')->onDelete('set null');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
         });
     }

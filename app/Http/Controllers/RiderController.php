@@ -9,9 +9,11 @@ use App\Models\Order;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Product;
+use App\Models\OrderItem;
 use App\Models\Bazar;
 use App\Models\RiderProduct;
 use Illuminate\Support\Facades\Hash;
+use Auth;
 
 class RiderController extends Controller
 {
@@ -22,6 +24,9 @@ class RiderController extends Controller
             ->latest()
             ->take(5)
             ->get() ?? [];
+
+        
+        $data['orders'] = Order::where('status', 'pending')->orderBy('created_at', 'desc')->get();    
     
         return view('backend.riders.index', $data);
     }
@@ -37,7 +42,10 @@ class RiderController extends Controller
         ->get();
         
         return view('backend.riders.my_products', $data);
-}
+    }
+
+
+
  
 
 public function riderProductStore(Request $request)
@@ -66,11 +74,7 @@ public function productdestroy($id)
 }
 
 
-
-
-
-
-
+ 
 
     public function index()
     {
@@ -152,8 +156,6 @@ public function productdestroy($id)
         return redirect()->back()->with('success', '✅ রাইডার রেজিস্ট্রেশন সফলভাবে সম্পন্ন হয়েছে!');
     }
 
-
-
  
 
     public function destroy($id)
@@ -163,6 +165,53 @@ public function productdestroy($id)
 
         return response()->json(['success' => true, 'message' => 'Rider deleted successfully']);
     }
+
+
+
+    // ✅ Show Order Board Page
+    public function riderOrders()
+    {
+        // শুধুমাত্র pending orders দেখানো হবে
+        $orders = Order::where('status', 'pending')->orderBy('created_at', 'desc')->get();
+
+        return view('backend.riders.rider_orders', compact('orders'));
+    }
+   
+
+public function pendingOrders()
+{
+    $orders = Order::with(['user', 'items.product'])->where('status', 'pending')->latest()->get();
+
+    // প্রতিটা product image কে full URL বানানো
+    $orders->each(function ($order) {
+        $order->items->each(function ($i) {
+            $i->product->full_image = $i->product->image 
+                ? asset('uploads/products/' . $i->product->image)
+                : asset('default-product.png');
+        });
+    });
+
+    return response()->json(['orders' => $orders]);
+}
+
+
+    // 🔹 Rider accept order with price update
+    public function acceptOrder(Request $request)
+    {
+        $order = Order::findOrFail($request->id);
+            $order->status = 'accepted';
+            $order->rider_id = Auth::id();
+            $order->total_amount = $request->total_amount;
+            $order->save();
+
+        // update individual items if price modified
+        foreach ($request->items as $item) {
+            OrderItem::where('id', $item['id'])->update(['rider_price' => $item['price']]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Order accepted successfully!']);
+    }
+
 
 
 

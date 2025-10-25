@@ -52,6 +52,13 @@ Route::get('rider/earnings', [RiderController::class, 'riderEarnings'])->name('r
 Route::get('rider/support', [RiderController::class, 'riderSupport'])->name('rider.support');
 Route::get('rider/settings', [RiderController::class, 'riderSettings'])->name('rider.settings');
 
+// Rider pending order list (for auto-load)
+Route::get('/rider/orders/pending', [RiderController::class, 'pendingOrders'])->name('rider.orders.pending');
+
+// Rider accept order
+Route::post('/rider/orders/accept', [RiderController::class, 'acceptOrder'])->name('rider.orders.accept');
+
+
 
 Route::get('/register-user', [RegisterController::class, 'create'])->name('user.register');
 Route::post('/register-user', [RegisterController::class, 'store'])->name('user.register.store');
