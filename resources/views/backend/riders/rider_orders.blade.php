@@ -85,7 +85,13 @@
         @endphp
 
         <div class="w-full mb-4">
-            <div class="bg-white p-5 rounded-2xl shadow-md hover:shadow-lg transition order-item border border-gray-100 w-full">
+            <div class="relative bg-white p-5 mt-2 rounded-2xl shadow-md hover:shadow-lg transition order-item border border-gray-100 w-full">
+    {{-- 🔹 Order ID badge (top-left) --}}
+    <span class="absolute -top-3 left-5 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow">
+        অর্ডার আইডি: #{{ $order->id }}
+    </span>
+
+
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
 
                     <!-- 🧍‍♂️ Customer Info -->
@@ -116,7 +122,12 @@
                         @if ($order->status == 'accepted')
                             <button  class="deliverBtn bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg transition w-full md:w-auto"
                                 data-id="{{ $order->id }}">
-                                ✅ ডেলিভারি সম্পন্ন
+                                ✅ ডেলিভারি সম্পন্ন করুন
+                            </button>
+                            <p class="text-xs p-3 ">এস্টিমেট ডেলিভারি সময়ঃ {{$order->delivery_time}} মিনিট</p>
+                        @elseif($order->status == 'rider_modified_accepted')
+                            <button  class="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold px-6 py-2 rounded-lg transition w-full md:w-auto">
+                                ✅ মুল্য বর্ধিত পাঠানো হয়েছে
                             </button>
                         @elseif($order->status == 'delivered')
                             <button  class="bg-gray-600 hover:bg-gray-700 text-white font-semibold px-6 py-2 rounded-lg transition w-full md:w-auto">

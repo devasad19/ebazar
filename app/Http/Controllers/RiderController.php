@@ -14,6 +14,7 @@ use App\Models\Bazar;
 use App\Models\RiderProduct;
 use Illuminate\Support\Facades\Hash;
 use Auth;
+use Carbon\Carbon;
 
 class RiderController extends Controller
 {
@@ -167,50 +168,57 @@ public function productdestroy($id)
     }
 
 
+    public function markAsDelivered($id)
+    {
+        $order = Order::where('rider_id', auth()->id())
+            ->where('id', $id)
+            ->where('status', 'accepted')
+            ->first();
+
+        if (!$order) {
+            return response()->json(['success' => false, 'message' => 'অর্ডার পাওয়া যায়নি বা ইতিমধ্যে সম্পন্ন হয়েছে।'], 404);
+        }
+
+        $order->status = 'delivered';
+        $order->delivered_at = Carbon::now('Asia/Dhaka'); // ✅ লোকাল টাইমে now()
+
+        // ✅ Compare now() vs delivery_at
+        if ($order->delivery_at) {
+            $now = Carbon::now('Asia/Dhaka');
+            if ($order->delivery_at > $now) {
+                $order->delivered_status = 'on_time';
+            } else {
+                $order->delivered_status = 'late';
+            }
+        } else {
+            $order->delivered_status = null;
+        }
+
+        $order->save();
+
+
+        return response()->json([
+            'success' => true,
+            'message' => '✅ অর্ডার সফলভাবে সম্পন্ন হয়েছে!',
+            'order_id' => $id,
+            'delivered_status' => $order->delivered_status,
+        ]);
+    }
+
 
     // ✅ Show Order Board Page
     public function riderOrders()
     {
         // rider er accepted orders দেখানো হবে
         $orders = Order::where('rider_id', auth()->id())
-            ->whereIn('status', ['accepted', 'delivered'])
+            ->whereIn('status', ['accepted', 'rider_modified_accepted', 'delivered'])
             ->orderBy('created_at', 'desc')
             ->get();
-
  
         return view('backend.riders.rider_orders', compact('orders'));
     }
    
-// app/Http/Controllers/RiderOrderController.php
-
-public function markDelivered(Request $request, $id)
-{
-    $order = Order::where('id', $id)
-        ->where('rider_id', auth()->id())
-        ->firstOrFail();
-
-    $order->status = 'delivered';
-    $order->delivered_at = now();
-
-    // 🔹 Compare delivered_at vs delivery_time
-    if ($order->delivery_time) {
-        $expectedTime = \Carbon\Carbon::parse($order->created_at)->addMinutes($order->delivery_time);
-        $order->delivered_status = now()->lessThanOrEqualTo($expectedTime) ? 'on_time' : 'late';
-    } else {
-        $order->delivered_status = '';
-    }
-
-    $order->save();
-
-    return response()->json([
-        'success' => true,
-        'message' => '✅ অর্ডার সফলভাবে সম্পন্ন হয়েছে!',
-        'order_id' => $id,
-        'delivered_status' => $order->delivered_status,
-    ]);
-}
-
-
+ 
 
 
 public function pendingOrders()
@@ -229,24 +237,41 @@ public function pendingOrders()
     return response()->json(['orders' => $orders]);
 }
 
+ 
 
+public function acceptOrder(Request $request)
+{
+   
+    $order = Order::findOrFail($request->id);
 
-    // 🔹 Rider accept order with price update
-    public function acceptOrder(Request $request)
-    {
-        $order = Order::findOrFail($request->id);
-            $order->status = 'accepted';
-            $order->rider_id = Auth::id();
-            $order->total_amount = $request->total_amount;
-            $order->save();
-
-        // update individual items if price modified
-        foreach ($request->items as $item) {
-            OrderItem::where('id', $item['id'])->update(['rider_price' => $item['price']]);
-        }
-
-        return response()->json(['success' => true, 'message' => 'Order accepted successfully!']);
+    if ($order->total_amount < $request->total_amount) {
+        $status = 'rider_modified_accepted';
+    } else {
+        $status = 'accepted';
     }
+ 
+    // ⚡ Add delivery_time (in minutes) to current time
+    $delivery_at = Carbon::now('Asia/Dhaka')->addMinutes($request->delivery_time);
+
+    $order->status = $status;
+    $order->rider_id = Auth::id();
+    // $order->total_amount = $request->total_amount;
+    $order->delivery_time = $request->delivery_time;
+    $order->delivery_at = $delivery_at;
+    $order->save();
+
+    // 🧾 Update rider_price for each item
+    foreach ($request->items as $item) {
+        OrderItem::where('id', $item['id'])
+            ->update(['rider_price' => $item['price']]);
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Order accepted successfully!',
+        'delivery_at' => $delivery_at->format('Y-m-d H:i:s')
+    ]);
+}
 
 
 

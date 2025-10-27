@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Bazar;
+use App\Models\Rider;
 use App\Models\Order;
 
 class AdminDashboardController extends Controller

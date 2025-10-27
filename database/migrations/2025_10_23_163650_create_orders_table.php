@@ -26,10 +26,12 @@ return new class extends Migration
 
             // ✅ Delivery & Status
             $table->enum('status', ['pending', 'accepted', 'delivered', 'cancelled'])->default('pending');
-            $table->timestamp('delivery_date')->nullable();
+            $table->timestamp('delivery_time')->nullable();
+            $table->timestamp('delivery_at')->nullable();
+            $table->timestamp('delivered_at')->nullable();
 
             // ✅ Rider Performance Tracking
-            $table->boolean('delivered_on_time')->default(false);
+            $table->string('delivered_status')->default(false);
             $table->string('notes')->nullable();
 
             $table->timestamps();

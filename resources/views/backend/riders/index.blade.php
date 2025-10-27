@@ -94,6 +94,10 @@
 
         <div id="modalItems" class="space-y-3"></div>
 
+                <div class="w-full text-left mt-3">
+                    <label class="block font-semibold  text-gray-700 mb-2">ডেলিভারি সময় সেট করুন(মিনিট) ঃ</label>
+                    <input type="number" id="delivery_time" class="border p-1 w-full rounded mx-auto" placeholder="Exp: 30 মিনিট" required/> 
+                </div>
         <div class="flex justify-between mt-6 border-t pt-4">
             <p class="font-bold text-lg">Total:</p>
             <p id="modalTotal" class="font-bold text-lg text-green-600">৳0</p>
@@ -158,8 +162,12 @@ function loadOrders() {
                     let totalText = totalTextParts.join(' + ') || '-';
 
                 $('#orderBoard').append(`
-                    <div class="w-full">
-                        <div class="bg-white p-5 rounded-2xl shadow-md hover:shadow-lg transition order-item border border-gray-100 w-full" data-id="${order.id}">
+                    <div class="w-full">        
+                    <div class="relative bg-white p-5 mt-3 rounded-2xl shadow-md hover:shadow-lg border order-item w-full mb-1" data-id="${order.id}">
+                    
+                        <span class="absolute -top-3 left-5 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow">
+                            অর্ডার আইডি: # ${order.id }
+                        </span>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
 
                                 <!-- 🧍‍♂️ Customer Info -->
@@ -274,6 +282,7 @@ $('#confirmAccept').on('click', function() {
     });
 
     const total = $('#modalTotal').text().replace('৳', '');
+    const delivery_time = $('#delivery_time').val();
     $.ajax({
         url: "{{ route('rider.orders.accept') }}",
         method: 'POST',
@@ -281,6 +290,7 @@ $('#confirmAccept').on('click', function() {
             id: orderId,
             items: items,
             total_amount: total,
+            delivery_time: delivery_time,
             _token: "{{ csrf_token() }}"
         },
         success: function(res) {

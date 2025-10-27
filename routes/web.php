@@ -63,6 +63,8 @@ Route::post('/rider/orders/deliver/{id}', [RiderController::class, 'markAsDelive
 
 
 
+
+
 Route::get('/register-user', [RegisterController::class, 'create'])->name('user.register');
 Route::post('/register-user', [RegisterController::class, 'store'])->name('user.register.store');
 
@@ -122,7 +124,9 @@ Route::get('user/dashboard/my-cart', [UserDashboardController::class, 'myCart'])
 Route::get('user/dashboard/settings', [UserDashboardController::class, 'mySettings'])->name('user.settings');
 
 
-
+    Route::get('order/ajax/details', [UserDashboardController::class, 'details'])->name('rider.order.details');
+    Route::post('order/user/accept', [UserDashboardController::class, 'accept'])->name('rider.order.accept');
+    Route::post('user/order/cancell', [UserDashboardController::class, 'orderCancell'])->name('rider.order.cancell');
 
 
  

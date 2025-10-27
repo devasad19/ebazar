@@ -42,7 +42,7 @@
             <!-- Orders Table -->
         <!-- Recent Orders -->
             
-            <div id="orderBoard" class="grid grid-cols-1 md:grid-cols-1 gap-6"></div>
+            <div id="orderBoard" class="grid grid-cols-1 md:grid-cols-1 gap-4"></div>
            
         </section>
 
@@ -201,9 +201,7 @@ function renderOrderCard(order) {
             </button>
         `;
     }
-
-console.log(order.rider?.name);
-
+ 
     
     // ✅ Delivery Info
     let deliveryInfo = '';
@@ -227,7 +225,11 @@ console.log(order.rider?.name);
     }
 
     return `
-        <div class="bg-white p-5 rounded-2xl shadow-md hover:shadow-lg border order-item w-full mb-4" data-id="${order.id}">
+        <div class="relative bg-white p-5 mt-3 rounded-2xl shadow-md hover:shadow-lg border order-item w-full mb-1" data-id="${order.id}">
+            {{-- 🔹 Order ID badge (top-left) --}}
+    <span class="absolute -top-3 left-5 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow">
+        অর্ডার আইডি: # ${order.id }
+    </span>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                     <h4 class="text-lg font-semibold text-green-700">${order.user?.name ?? 'অজানা ক্রেতা'}</h4>

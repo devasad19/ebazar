@@ -19,9 +19,18 @@ class Order extends Model
         'status',
         'delivery_time',
         'delivered_at',
+        'delivery_at',
         'delivered_status',
         'notes',
     ];
+
+// app/Models/Order.php
+
+protected $casts = [
+    'delivered_at' => 'datetime',
+];
+
+
 
      public function order()
     {
