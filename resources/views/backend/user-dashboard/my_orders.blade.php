@@ -47,34 +47,63 @@
                         @foreach ($orders as $order)
                             @php
                                 // 🧮 মোট পরিমাণ হিসাব
-                                $totals = [
-                                    'কেজি' => 0,
-                                    'পিস' => [],
-                                    'ডজন' => [],
-                                    'লিটার' => [],
-                                    'প্যাকেট' => []
-                                ];
+ 
+ 
+$totals = [
+    'কেজি' => [],
+    'পিস' => [],
+    'ডজন' => [],
+    'লিটার' => [],
+    'প্যাকেট' => [],
+    'টাকা' => []
+];
 
-                                foreach ($order->items as $i) {
-                                    $unit = trim($i->product->unit ?? '');
-                                    $qty = floatval($i->quantity ?? 0);
-                                    $name = $i->product->name ?? 'অজানা পণ্য';
+// 👉 1. Normal products
+foreach ($order->items as $i) {
+    $name = $i->product->name ?? 'অজানা পণ্য';
+    $unit = trim($i->product->unit ?? '');
+    $qty = floatval($i->quantity ?? 0);
 
-                                    if ($unit === 'কেজি') {
-                                        $totals['কেজি'] += $qty;
-                                    } elseif (array_key_exists($unit, $totals)) {
-                                        $totals[$unit][] = "{$name} ({$qty})";
-                                    }
-                                }
+    if ($unit && array_key_exists($unit, $totals)) {
+        // ✅ প্রতিটি পণ্যের সাথেই unit যোগ করছি
+        $totals[$unit][] = "{$name} ({$qty} {$unit})";
+    }
+}
 
-                                $totalTextParts = [];
-                                if ($totals['কেজি'] > 0) $totalTextParts[] = number_format($totals['কেজি'], 1) . ' কেজি';
-                                foreach (['পিস','ডজন','লিটার','প্যাকেট'] as $unit) {
-                                    if (count($totals[$unit]) > 0) {
-                                        $totalTextParts[] = implode(', ', $totals[$unit]) . " {$unit}";
-                                    }
-                                }
-                                $totalText = implode(' + ', $totalTextParts) ?: '-';
+// 👉 2. Custom products (from JSON field)
+if (!empty($order->custom_products)) {
+    foreach ($order->custom_products as $cp) {
+        $name = $cp['name'] ?? 'অজানা পণ্য';
+        $qty = floatval($cp['quantity'] ?? 0);
+        $price = floatval($cp['price'] ?? 0);
+        $unit = trim($cp['unit'] ?? '');
+
+        if ($unit === 'টাকা') {
+            $totals['টাকা'][] = "{$name} ({$price} টাকা)";
+        } elseif ($unit && array_key_exists($unit, $totals)) {
+            $totals[$unit][] = "{$name} ({$qty} {$unit})";
+        } else {
+            // unit না থাকলে default টাকা ধরা
+            $totals['টাকা'][] = "{$name} ({$price} টাকা)";
+        }
+    }
+}
+
+// 👉 3. Final formatted text
+$totalTextParts = [];
+
+foreach (['কেজি','পিস','ডজন','লিটার','প্যাকেট','টাকা'] as $unit) {
+    if (count($totals[$unit]) > 0) {
+        // ✅ এখন আলাদা আলাদা পণ্য, শেষে আর আলাদা unit লাগবে না
+        $totalTextParts[] = implode(', ', $totals[$unit]);
+    }
+}
+
+$totalText = implode(', ', $totalTextParts) ?: '-';
+ 
+ 
+ 
+
 
                                 // 💰 Rider price difference check
                                 $hasPriceDifference = $order->items->contains(function($item) {

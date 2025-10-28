@@ -122,44 +122,63 @@ function loadOrders() {
 
                 // 🧮 Calculate total by unit
                     // 🧮 Calculate totals with product names (except কেজি)
-                    let totals = {
-                        'কেজি': 0,
-                        'পিস': [],
-                        'ডজন': [],
-                        'লিটার': [],
-                        'প্যাকেট': []
-                    };
+ let totals = {
+    'কেজি': [],
+    'পিস': [],
+    'ডজন': [],
+    'লিটার': [],
+    'প্যাকেট': [],
+    'টাকা': [],
+};
 
-                    (order.items || []).forEach(i => {
-                        const unit = i.product?.unit?.trim();
-                        const qty = parseFloat(i.quantity) || 0;
-                        const name = i.product?.name ?? 'অজানা পণ্য';
+// 🔹 Normal products
+(order.items || []).forEach(i => {
+    const unit = (i.product?.unit || '').trim();
+    const qty = parseFloat(i.quantity) || 0;
+    const price = parseFloat(i.price) || 0;
+    const name = i.product?.name ?? 'অজানা পণ্য';
 
-                        if (!unit) return;
+    if (!unit) return;
 
-                        if (unit === 'কেজি') {
-                            totals['কেজি'] += qty; // keep kg total
-                        } else if (totals.hasOwnProperty(unit)) {
-                            totals[unit].push(`${name} (${qty})`); // save product name + qty
-                        }
-                    });
+    if (unit === 'টাকা') {
+        totals[unit].push(`${name} (${price}) ${unit}`);
+    } else if (totals.hasOwnProperty(unit)) {
+        totals[unit].push(`${name} (${qty}) ${unit}`);
+    } else {
+        totals[unit] = [`${name} (${qty}) ${unit}`];
+    }
+});
 
-                    // Build display string
-                    let totalTextParts = [];
+// 🔹 Custom products
+(order.custom_products || []).forEach(i => {
+    const unit = (i.unit || '').trim();
+    const qty = parseFloat(i.quantity) || 0;
+    const price = parseFloat(i.price) || 0;
+    const name = i.name ?? 'আরো';
 
-                    // কেজি প্রথম
-                    if (totals['কেজি'] > 0) {
-                        totalTextParts.push(`${totals['কেজি'].toFixed(1)} কেজি`);
-                    }
+    if (!unit) return;
 
-                    // অন্য units
-                    ['পিস','ডজন','লিটার','প্যাকেট'].forEach(unit => {
-                        if (totals[unit].length > 0) {
-                            totalTextParts.push(totals[unit].join(', ') + ` ${unit}`);
-                        }
-                    });
+    if (unit === 'টাকা') {
+        totals[unit].push(`${name} (${price}) ${unit}`);
+    } else if (totals.hasOwnProperty(unit)) {
+        totals[unit].push(`${name} (${qty}) ${unit}`);
+    } else {
+        totals[unit] = [`${name} (${qty}) ${unit}`];
+    }
+});
 
-                    let totalText = totalTextParts.join(' + ') || '-';
+// 🔹 Join সবগুলো সুন্দরভাবে
+let totalTextParts = [];
+
+['কেজি', 'পিস', 'ডজন', 'লিটার', 'প্যাকেট', 'টাকা'].forEach(unit => {
+    if (totals[unit] && totals[unit].length > 0) {
+        totalTextParts.push(totals[unit].join(', '));
+    }
+});
+
+let totalText = totalTextParts.join(' + ') || '-';
+
+
 
                 $('#orderBoard').append(`
                     <div class="w-full">        

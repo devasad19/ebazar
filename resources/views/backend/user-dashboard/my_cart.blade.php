@@ -11,47 +11,66 @@
 
         <!-- Top Bar -->
     @include('backend.patrials.top_bar')
-
+        <form action="{{ route('place.order') }}" method="POST" class="space-y-6">
+    @csrf
         <!-- Content Body --> 
   <section class="bg-gray-50 p-6 rounded-2xl shadow">
      <h2 class="text-2xl font-bold text-green-700 mb-6">🛒 আমার কার্ট</h2>
-
+        
     @if(count($cartItems) > 0)
-    <div class="overflow-x-auto">
-        <table class="w-full bg-white rounded-2xl shadow">
-            <thead class="bg-green-100 text-green-700 font-semibold">
-                <tr>
-                    <th class="p-3 text-left">পণ্য</th>
-                    <th class="p-3">দাম</th>
-                    <th class="p-3">পরিমাণ</th>
-                    <th class="p-3">মোট</th>
-                    <th class="p-3">অ্যাকশন</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($cartItems as $item)
-                <tr class="border-b">
-                    <td class="flex items-center gap-3 p-3">
-                        <img src="{{ $item['image'] }}" alt="{{ $item['name'] }}" class="w-16 h-16 object-cover rounded-lg">
-                        <span class="font-semibold text-gray-800">{{ $item['name'] }}</span>
-                    </td>
-                    <td class="text-center text-green-600 font-semibold">৳{{ $item['price'] }}</td>
-                    <td class="text-center">
-                        <div class="inline-flex items-center border rounded-full overflow-hidden">
-                            <button type="button" class="px-3 py-1 bg-indigo-500 text-white" onclick="decreaseQty(this)">-</button>
-                            <input type="number" value="{{ $item['quantity'] }}" min="1" class="w-16 text-center border-none focus:ring-0 quantityInput" onchange="updateItemTotal(this)">
-                            <button type="button" class="px-3 py-1 bg-indigo-500 text-white" onclick="increaseQty(this)">+</button>
-                        </div>
-                    </td>
-                    <td class="text-center text-green-700 font-semibold itemTotal">৳{{ $item['price'] * $item['quantity'] }}</td>
-                    <td class="text-center">
-                        <button class="text-red-500 hover:text-red-700 font-bold text-xl" onclick="removeItem(this)">×</button>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+        <div class="space-y-3">
+            @foreach($cartItems as $cart)
+<div class="cart-item flex justify-between items-center border-b pb-3 py-2 gap-4" data-product_id="{{ $cart->product_id }}" data-id="{{ $cart->id }}">
+    <!-- Product Info -->
+    <div class="flex items-center gap-3 w-1/3">
+        <img src="{{ $cart->product->image ? url('uploads/products/'.$cart->product->image) : '' }}"
+             class="w-16 h-16 object-cover rounded-lg">
+        <h4 class="font-semibold text-gray-800">{{ $cart->product->name }}</h4>
     </div>
+
+    <!-- Quantity Control -->
+    <div class="flex items-center justify-center w-1/4">
+        <button type="button" 
+            class="bg-indigo-500 text-white px-3 py-1 rounded-l-full"
+            onclick="changeQty(this, 'decrease')">-</button>
+        <input type="number" 
+            value="{{ $cart->quantity }}" 
+            min="1"
+            class="w-16 text-center border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-300 py-1 mx-1 rounded">
+        <button type="button" 
+            class="bg-indigo-500 text-white px-3 py-1 rounded-r-full"
+            onclick="changeQty(this, 'increase')">+</button>
+    </div>
+
+    <!-- Price Info -->
+    <div class="flex flex-col items-center w-1/4">
+        <p class="text-green-600 text-sm">৳{{ $cart->price }} x <span class="itemQty">{{ $cart->quantity }}</span></p>
+        <p></p>
+    </div>
+    
+    <!-- Remove Button -->
+    <div class="flex3 items-center text-right justify-end w-1/6">
+        <p class="text-green-700 font-semibold text-base itemTotal">৳{{ $cart->price * $cart->quantity }}</p>
+        <button type="button" class="text-red-500 hover:text-red-700 text-lg font-bold"
+            onclick="removeItem(this)">❌</button>
+    </div>
+</div>
+            @endforeach
+        </div>
+
+        <!-- ✅ Custom Products Section (now inside form) -->
+        <div class="bg-gray-50 rounded-2xl border p-5  mt-3" id="customProductsSection">
+            <h3 class="text-lg font-semibold text-gray-700 mb-4 flex justify-between">
+                <span>➕ কাস্টম পণ্য যোগ করুন</span>
+                <button type="button" id="addCustomProduct"
+                    class="bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700 transition">+ নতুন পণ্য</button>
+            </h3>
+            <div id="customProductList" class="space-y-3 w-full"></div>
+                
+        </div>
+
+        <input type="hidden" id="baseTotal" value="{{ $total }}">
+<input type="hidden" id="customTotal" name="customTotal" value="0">
 
 
         <div class="flex justify-between mt-6 text-lg font-bold text-green-700">
@@ -63,9 +82,6 @@
 
     <div class="bg-white rounded-2xl shadow p-6">
         <h3 class="text-xl font-semibold text-gray-700 mb-4">ডেলিভারি তথ্য</h3>
-        
-        <form action="#" method="POST" class="space-y-4">
-            @csrf
 
             @php
                 // Example: user profile data
@@ -116,14 +132,13 @@
             <button type="submit" class="bg-green-600 text-white w-full py-3 rounded-lg hover:bg-green-700 transition font-semibold">
                 ✅ অর্ডার কনফার্ম করুন
             </button>
-        </form>
-    </div>
+        </div>
 
+        @else
+        <p class="text-center text-gray-500 py-12">আপনার কার্ট খালি। 🛒</p>
+        @endif
 
-
-    @else
-    <p class="text-center text-gray-500 py-12">আপনার কার্ট খালি। 🛒</p>
-    @endif
+    </form>
 </section>
 
  
@@ -140,71 +155,189 @@
 @endsection
 @section('scripts')
 <script>
-function removeItem(btn) {
-    const row = btn.closest('tr');
-    row.remove();
-    updateTotal();
-}
+
 
 function showQtyNotification() {
     const notif = document.getElementById('qtyNotification');
+    if (!notif) return;
+
     notif.classList.remove('opacity-0');
     notif.classList.add('opacity-100');
 
+    // ২ সেকেন্ড পরে আবার fade out হবে
     setTimeout(() => {
         notif.classList.remove('opacity-100');
         notif.classList.add('opacity-0');
-    }, 1000);
+    }, 2000);
 }
 
-function decreaseQty(btn) {
-    const input = btn.nextElementSibling;
-    if (parseInt(input.value) > 1) {
-        input.value = parseInt(input.value) - 1;
-        updateItemTotal(input);
-        showQtyNotification();
-    }
-}
+ // ======================
+// 🛒 Main Cart Functions
+// ======================
 
-function increaseQty(btn) {
-    const input = btn.previousElementSibling;
-    input.value = parseInt(input.value) + 1;
-    updateItemTotal(input);
-    showQtyNotification();
-}
+// 🔹 Quantity Change
+function changeQty(btn, type) {
+    const item = btn.closest('.cart-item');
+    if (!item) return;
 
-function updateItemTotal(input) {
-    const row = input.closest('tr');
-    const price = parseInt(row.querySelector('td:nth-child(2)').innerText.replace('৳',''));
-    const qty = parseInt(input.value);
-    row.querySelector('.itemTotal').innerText = `৳${price * qty}`;
-    updateTotal();
-}
+    const input = item.querySelector('input');
+    let qty = parseInt(input.value);
+    qty = type === 'increase' ? qty + 1 : Math.max(1, qty - 1);
+    input.value = qty;
 
-function updateTotal() {
-    let total = 0;
-    document.querySelectorAll('.itemTotal').forEach(el => {
-        total += parseInt(el.innerText.replace('৳',''));
+    const itemQty = item.querySelector('.itemQty');
+    if (itemQty) itemQty.textContent = qty;
+
+    const id = item.dataset.id;
+
+    $.ajax({
+        url: "{{ route('cart.update') }}",
+        method: 'POST',
+        data: { id, quantity: qty },
+        success: function (data) {
+            if (data.success) {
+                item.querySelector('.itemTotal').innerText = `৳${data.itemTotal}`;
+                document.getElementById('baseTotal').value = data.cartTotal; // update hidden baseTotal
+                updateGrandTotal();
+                showToast('success', 'Updated', 'পরিমাণ আপডেট হয়েছে ✅');
+            } else {
+                showToast('error', 'Failed', 'আপডেট ব্যর্থ হয়েছে ❌');
+            }
+        },
+        error: function () {
+            showToast('error', 'Server Error', 'সার্ভারে সমস্যা হয়েছে!');
+        },
     });
-    document.getElementById('cartTotal').innerText = `৳${total}`;
 }
-</script>
 
-<script>
-    const newAddressCheckbox = document.getElementById('newAddress');
-    const addressInput = document.getElementById('addressInput');
-    const phoneInput = document.getElementById('phoneInput');
+// 🔹 Remove Item
+function removeItem(btn) {
+    const item = btn.closest('.cart-item');
+    if (!item) return;
 
-    newAddressCheckbox.addEventListener('change', function() {
-        if(this.checked) {
-            addressInput.removeAttribute('readonly');
-            phoneInput.removeAttribute('readonly');
-            addressInput.focus();
-        } else {
-            addressInput.setAttribute('readonly', true);
-            phoneInput.setAttribute('readonly', true);
+    console.log(item);
+    
+    const id = item.dataset.product_id;
+    const routeUrl = `{{ route('cart.remove', ':id') }}`.replace(':id', id);
+
+    swalConfirm('আপনি কি এই পণ্যটি কার্ট থেকে মুছে ফেলতে চান?', function () {
+        $.ajax({
+            url: routeUrl,
+            method: 'POST',
+            success: function (data) {
+                if (data.success) {
+                    item.remove();
+                    document.getElementById('baseTotal').value = data.cartTotal;
+                    updateGrandTotal();
+                    showToast('success', 'Removed', 'পণ্যটি মুছে ফেলা হয়েছে 🗑️');
+                } else {
+                    showToast('error', 'Failed', 'রিমুভ করা যায়নি!');
+                }
+            },
+            error: function () {
+                showToast('error', 'Server Error', 'সার্ভারে সমস্যা হয়েছে!');
+            },
+        });
+    });
+}
+
+// 🔹 New Address Toggle
+const newAddressCheckbox = document.getElementById('newAddress');
+const addressInput = document.getElementById('addressInput');
+const phoneInput = document.getElementById('phoneInput');
+
+if (newAddressCheckbox) {
+    newAddressCheckbox.addEventListener('change', function () {
+        const editable = this.checked;
+        [addressInput, phoneInput].forEach((input) => {
+            if (editable) {
+                input.removeAttribute('readonly');
+                input.focus();
+            } else {
+                input.setAttribute('readonly', true);
+            }
+        });
+    });
+}
+
+// ===========================
+// 🧩 Custom Product Functions
+// ===========================
+
+document.getElementById('addCustomProduct').addEventListener('click', function () {
+    const id = Date.now();
+
+    const productHtml = `
+        <div class="custom-product border p-4 rounded-2xl bg-gray-50 shadow-sm flex flex-col md:flex-row md:items-center md:gap-3 gap-3" data-id="${id}">
+            <input type="text" name="custom_products[${id}][name]" class="cp-name border border-green-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-green-400 outline-none" placeholder="পণ্যের নাম" required>
+
+            <div class="flex flex-col sm:flex-row w-full gap-3">
+                <input type="number" name="custom_products[${id}][qty]" class="cp-qty border border-green-300 p-2 rounded-lg w-full sm:w-1/3 focus:ring-2 focus:ring-green-400 outline-none"
+                    placeholder="পরিমাণ" step="0.1">
+
+                <select name="custom_products[${id}][unit]" class="cp-unit border border-green-300 p-2 rounded-lg w-full sm:w-1/3 focus:ring-2 focus:ring-green-400 outline-none" required>
+                    <option value="কেজি">কেজি</option>
+                    <option value="লিটার">লিটার</option>
+                    <option value="পিস">পিস</option>
+                    <option value="ডজন">ডজন</option>
+                    <option value="টাকা">টাকা</option>
+                </select>
+
+                <input type="number" name="custom_products[${id}][price]" class="cp-price border border-green-300 p-2 rounded-lg w-full sm:w-1/3 focus:ring-2 focus:ring-green-400 outline-none"
+                    placeholder="মূল্য (৳)">
+            </div>
+
+            <button type="button" class="text-red-500 hover:text-red-700 font-bold text-2xl self-end md:self-center removeCustom">×</button>
+        </div>
+    `;
+
+    document.getElementById('customProductList').insertAdjacentHTML('beforeend', productHtml);
+    updateCustomTotal();
+});
+
+document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('removeCustom')) {
+        e.target.closest('.custom-product').remove();
+        updateCustomTotal();
+    }
+});
+
+document.addEventListener('input', function (e) {
+    if (e.target.closest('.custom-product')) {
+        updateCustomTotal();
+    }
+});
+
+// 🔹 Custom total হিসাব করা
+function updateCustomTotal() {
+    let customTotal = 0;
+
+    document.querySelectorAll('.custom-product').forEach((el) => {
+        const qty = parseFloat(el.querySelector('.cp-qty')?.value || 0);
+        const unit = el.querySelector('.cp-unit')?.value;
+        const price = parseFloat(el.querySelector('.cp-price')?.value || 0);
+
+        if (unit === 'টাকা') {
+            customTotal += price;
+        } else if (qty > 0 && price > 0) {
+            customTotal += qty * price;
         }
     });
-</script>
 
+    // Hidden custom total update
+    document.getElementById('customTotal').value = customTotal;
+    updateGrandTotal();
+}
+
+// 🔹 Base + Custom যোগ করে Grand total দেখানো
+function updateGrandTotal() {
+    const base = parseFloat(document.getElementById('baseTotal').value || 0);
+    const custom = parseFloat(document.getElementById('customTotal').value || 0);
+    const grand = base + custom;
+
+    document.getElementById('cartTotal').innerText = `৳${grand.toFixed(2)}`;
+}
+
+
+</script>
 @endsection

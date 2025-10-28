@@ -47,7 +47,7 @@ class AdminDashboardController extends Controller
 
     public function adminLiveOrders()
     {
-        $orders = Order::with(['user', 'rider', 'items.product'])->latest()->get();
+        $orders = Order::with(['user', 'rider', 'custom_products', 'items.product'])->latest()->get();
 
         return response()->json(['orders' => $orders]);
     }

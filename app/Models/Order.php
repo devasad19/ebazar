@@ -52,6 +52,17 @@ protected $casts = [
         return $this->hasMany(OrderItem::class);
     }
 
+    public function custom_products()
+    {
+        return $this->hasMany(CustomProduct::class);
+    }
+
+
+
+
+
+
+
 
 }
 

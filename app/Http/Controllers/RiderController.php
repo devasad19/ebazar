@@ -9,8 +9,9 @@ use App\Models\Order;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Product;
-use App\Models\OrderItem;
 use App\Models\Bazar;
+use App\Models\OrderItem;
+use App\Models\CustomProduct;
 use App\Models\RiderProduct;
 use Illuminate\Support\Facades\Hash;
 use Auth;
@@ -219,11 +220,9 @@ public function productdestroy($id)
     }
    
  
-
-
 public function pendingOrders()
 {
-    $orders = Order::with(['user', 'items.product'])->where('status', 'pending')->latest()->get();
+    $orders = Order::with(['user', 'custom_products', 'items.product'])->where('status', 'pending')->latest()->get();
 
     // প্রতিটা product image কে full URL বানানো
     $orders->each(function ($order) {
@@ -237,7 +236,6 @@ public function pendingOrders()
     return response()->json(['orders' => $orders]);
 }
 
- 
 
 public function acceptOrder(Request $request)
 {

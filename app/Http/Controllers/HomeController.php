@@ -155,16 +155,20 @@ public function riderProfile($id)
 
 public function homePlaceOrder()
 {
-    $user = Auth::user();
 
+    if (!Auth::check()) {
+        return redirect()->route('login')->with('error', 'অর্ডার দিতে হলে আগে লগইন করুন!');
+    }
+
+    $user = Auth::user();
     // ✅ ডাটাবেস থেকে কার্ট আইটেম আনা
     $cartItems = CartItem::with(['user', 'product'])
         ->where('user_id', $user->id)
         ->get();
-
+    $extraProducts = [];
     $total = $cartItems->sum(fn($item) => $item->product->price * $item->quantity);
 
-    return view('place-order', compact('cartItems', 'total', 'user'));
+    return view('place-order', compact('cartItems', 'total', 'user', 'extraProducts'));
 }
 
 

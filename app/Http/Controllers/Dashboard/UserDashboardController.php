@@ -45,6 +45,7 @@ class UserDashboardController extends Controller
 
         $data['orders'] = Order::where('user_id', auth()->id())
                 ->orderBy('created_at', 'desc')
+                ->with(['user', 'rider', 'custom_products', 'items.product'])
                 ->get();
 
 
@@ -58,14 +59,22 @@ class UserDashboardController extends Controller
 
     public function myCart(){
         
- 
-        $cartItems = CartItem::with(['product', 'user'])->where('user_id', auth()->id())->get();
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'অর্ডার দিতে হলে আগে লগইন করুন!');
+        }
+
+        $user = Auth::user();
+        // ✅ ডাটাবেস থেকে কার্ট আইটেম আনা
+        $cartItems = CartItem::with(['user', 'product'])
+            ->where('user_id', $user->id)
+            ->get();
+         
 
         $total = collect($cartItems)->sum(function($item){
             return $item['price'] * $item['quantity'];
         });
 
-        return view('backend.user-dashboard.my_cart', compact('cartItems', 'total'));
+        return view('backend.user-dashboard.my_cart', compact('cartItems', 'user', 'total'));
     }
 
 

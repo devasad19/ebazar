@@ -54,91 +54,7 @@
 
 @section('scripts')
 <script>
-function loadOrders2() {
-    $.get("{{ route('admin.orders.live') }}", function(data){
-        data.orders.forEach(order => {
-            if (!$(`#orderBoard .order-item[data-id="${order.id}"]`).length) {
-
-                // 🧮 Calculate total by unit
-                    // 🧮 Calculate totals with product names (except কেজি)
-                    let totals = {
-                        'কেজি': 0,
-                        'পিস': [],
-                        'ডজন': [],
-                        'লিটার': [],
-                        'প্যাকেট': []
-                    };
-
-                    (order.items || []).forEach(i => {
-                        const unit = i.product?.unit?.trim();
-                        const qty = parseFloat(i.quantity) || 0;
-                        const name = i.product?.name ?? 'অজানা পণ্য';
-
-                        if (!unit) return;
-
-                        if (unit === 'কেজি') {
-                            totals['কেজি'] += qty; // keep kg total
-                        } else if (totals.hasOwnProperty(unit)) {
-                            totals[unit].push(`${name} (${qty})`); // save product name + qty
-                        }
-                    });
-
-                    // Build display string
-                    let totalTextParts = [];
-
-                    // কেজি প্রথম
-                    if (totals['কেজি'] > 0) {
-                        totalTextParts.push(`${totals['কেজি'].toFixed(1)} কেজি`);
-                    }
-
-                    // অন্য units
-                    ['পিস','ডজন','লিটার','প্যাকেট'].forEach(unit => {
-                        if (totals[unit].length > 0) {
-                            totalTextParts.push(totals[unit].join(', ') + ` ${unit}`);
-                        }
-                    });
-
-                    let totalText = totalTextParts.join(' + ') || '-';
-
-                $('#orderBoard').append(`
-                    <div class="w-full">
-                        <div class="bg-white p-5 rounded-2xl shadow-md hover:shadow-lg transition order-item border border-gray-100 w-full" data-id="${order.id}">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-
-                                <!-- 🧍‍♂️ Customer Info -->
-                                <div>
-                                    <h4 class="text-lg font-semibold text-green-700 mb-1">
-                                        ${order.user?.name ?? 'অজানা ক্রেতা'}
-                                    </h4>
-                                    <p class="text-sm text-gray-600">পিতার নামঃ ${order.user?.father_name ?? '-'}</p>
-                                    <p class="text-sm text-gray-600">📞 ${order.user?.phone ?? '-'}</p>
-                                </div>
-
-                                <!-- 📦 Order Info -->
-                                <div class="text-gray-700">
-                                    <p><strong>পণ্যঃ</strong> ${order.items?.length ?? 0} টি</p>
-                                    <p><strong>মোটঃ</strong> <span class="text-green-700 font-semibold">৳${order.total_amount}</span></p>
-                                    <p><strong>ঠিকানাঃ</strong> ${order.delivery_address ?? '-'}</p>
-                                </div>
-
-                                <!-- ⏰ Time & Action -->
-                                <div class="flex flex-col justify-between text-left md:text-right">
-                                    <p class="text-sm text-gray-500 mb-3">
-                                        <strong>অর্ডার সময়ঃ</strong> ${new Date(order.created_at).toLocaleString('bn-BD')}
-                                    </p>
-                                    <button class="acceptBtn bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg transition w-full md:w-auto">
-                                        ✅ গ্রহণ করুন
-                                    </button>
-                                </div>
-                                </div>
-                                <p class="text-sm text-red-500 mt-3"><strong>মোট পরিমাণঃ</strong> ${totalText}</p>
-                        </div>
-                    </div>
-                `);
-            }
-        });
-    });
-}
+ 
 
 
 function loadOrders() {
@@ -156,29 +72,64 @@ loadOrders();
  
 
 
-
-
-
-
-
 function renderOrderCard(order) {
     // ✅ মোট পরিমাণ হিসাব (আগের মতো)
-    let totals = { 'কেজি': 0, 'পিস': [], 'ডজন': [], 'লিটার': [], 'প্যাকেট': [] };
-    (order.items || []).forEach(i => {
-        const unit = i.product?.unit?.trim();
-        const qty = parseFloat(i.quantity) || 0;
-        const name = i.product?.name ?? 'অজানা পণ্য';
-        if (!unit) return;
-        if (unit === 'কেজি') totals['কেজি'] += qty;
-        else if (totals.hasOwnProperty(unit)) totals[unit].push(`${name} (${qty})`);
-    });
+let totals = {
+    'কেজি': [],
+    'পিস': [],
+    'ডজন': [],
+    'লিটার': [],
+    'প্যাকেট': [],
+    'টাকা': [],
+};
 
-    let totalTextParts = [];
-    if (totals['কেজি'] > 0) totalTextParts.push(`${totals['কেজি'].toFixed(1)} কেজি`);
-    ['পিস','ডজন','লিটার','প্যাকেট'].forEach(unit => {
-        if (totals[unit].length > 0) totalTextParts.push(totals[unit].join(', ') + ` ${unit}`);
-    });
-    let totalText = totalTextParts.join(' + ') || '-';
+// 🔹 Normal products
+(order.items || []).forEach(i => {
+    const unit = (i.product?.unit || '').trim();
+    const qty = parseFloat(i.quantity) || 0;
+    const price = parseFloat(i.price) || 0;
+    const name = i.product?.name ?? 'অজানা পণ্য';
+
+    if (!unit) return;
+
+    if (unit === 'টাকা') {
+        totals[unit].push(`${name} (${price}) ${unit}`);
+    } else if (totals.hasOwnProperty(unit)) {
+        totals[unit].push(`${name} (${qty}) ${unit}`);
+    } else {
+        totals[unit] = [`${name} (${qty}) ${unit}`];
+    }
+});
+
+// 🔹 Custom products
+(order.custom_products || []).forEach(i => {
+    const unit = (i.unit || '').trim();
+    const qty = parseFloat(i.quantity) || 0;
+    const price = parseFloat(i.price) || 0;
+    const name = i.name ?? 'আরো';
+
+    if (!unit) return;
+
+    if (unit === 'টাকা') {
+        totals[unit].push(`${name} (${price}) ${unit}`);
+    } else if (totals.hasOwnProperty(unit)) {
+        totals[unit].push(`${name} (${qty}) ${unit}`);
+    } else {
+        totals[unit] = [`${name} (${qty}) ${unit}`];
+    }
+});
+
+// 🔹 Join সবগুলো সুন্দরভাবে
+let totalTextParts = [];
+
+['কেজি', 'পিস', 'ডজন', 'লিটার', 'প্যাকেট', 'টাকা'].forEach(unit => {
+    if (totals[unit] && totals[unit].length > 0) {
+        totalTextParts.push(totals[unit].join(', '));
+    }
+});
+
+let totalText = totalTextParts.join(' + ') || '-';
+
 
     // ✅ Status অনুযায়ী বাটন
     let buttonHTML = '';

@@ -47,41 +47,58 @@
     @foreach ($orders as $order)
         @php
             // 🧮 Calculate total by unit
-            $totals = [
-                'কেজি' => 0,
-                'পিস' => [],
-                'ডজন' => [],
-                'লিটার' => [],
-                'প্যাকেট' => []
-            ];
+           $totals = [
+    'কেজি' => [],
+    'পিস' => [],
+    'ডজন' => [],
+    'লিটার' => [],
+    'প্যাকেট' => [],
+    'টাকা' => []
+];
 
-            foreach($order->items as $item) {
-                $unit = trim($item->product->unit ?? '');
-                $qty = floatval($item->quantity ?? 0);
-                $name = $item->product->name ?? 'অজানা পণ্য';
+// 👉 1. Normal products
+foreach ($order->items as $i) {
+    $name = $i->product->name ?? 'অজানা পণ্য';
+    $unit = trim($i->product->unit ?? '');
+    $qty = floatval($i->quantity ?? 0);
 
-                if (!$unit) continue;
+    if ($unit && array_key_exists($unit, $totals)) {
+        // ✅ প্রতিটি পণ্যের সাথেই unit যোগ করছি
+        $totals[$unit][] = "{$name} ({$qty} {$unit})";
+    }
+}
 
-                if ($unit === 'কেজি') {
-                    $totals['কেজি'] += $qty;
-                } elseif(array_key_exists($unit, $totals)) {
-                    $totals[$unit][] = "$name ($qty)";
-                }
-            }
+// 👉 2. Custom products (from JSON field)
+if (!empty($order->custom_products)) {
+    foreach ($order->custom_products as $cp) {
+        $name = $cp['name'] ?? 'অজানা পণ্য';
+        $qty = floatval($cp['quantity'] ?? 0);
+        $price = floatval($cp['price'] ?? 0);
+        $unit = trim($cp['unit'] ?? '');
 
-            // Build display string
-            $totalParts = [];
-            if ($totals['কেজি'] > 0) {
-                $totalParts[] = number_format($totals['কেজি'], 1) . " কেজি";
-            }
+        if ($unit === 'টাকা') {
+            $totals['টাকা'][] = "{$name} ({$price} টাকা)";
+        } elseif ($unit && array_key_exists($unit, $totals)) {
+            $totals[$unit][] = "{$name} ({$qty} {$unit})";
+        } else {
+            // unit না থাকলে default টাকা ধরা
+            $totals['টাকা'][] = "{$name} ({$price} টাকা)";
+        }
+    }
+}
 
-            foreach(['পিস','ডজন','লিটার','প্যাকেট'] as $unit) {
-                if(count($totals[$unit]) > 0) {
-                    $totalParts[] = implode(', ', $totals[$unit]) . " $unit";
-                }
-            }
+// 👉 3. Final formatted text
+$totalTextParts = [];
 
-            $totalText = count($totalParts) > 0 ? implode(' + ', $totalParts) : '-';
+foreach (['কেজি','পিস','ডজন','লিটার','প্যাকেট','টাকা'] as $unit) {
+    if (count($totals[$unit]) > 0) {
+        // ✅ এখন আলাদা আলাদা পণ্য, শেষে আর আলাদা unit লাগবে না
+        $totalTextParts[] = implode(', ', $totals[$unit]);
+    }
+}
+
+$totalText = implode(', ', $totalTextParts) ?: '-';
+ 
         @endphp
 
         <div class="w-full mb-4">
