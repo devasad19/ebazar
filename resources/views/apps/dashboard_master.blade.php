@@ -16,7 +16,7 @@
     <div class="max-w-7xl mx-auto flex justify-between items-center px-4 py-3">
       <h1 class="text-2xl font-bold text-green-600">eBazar Dashboard</h1>
       <nav class="flex items-center gap-4">
-        <span class="text-gray-700">স্বাগত, মোঃ আহাদ</span>
+        <span class="text-gray-700">স্বাগত, {{ Auth::user()->name ?? 'নাম পাওয়া যায় নাই' }}</span>
         
         <form method="POST" action="{{ route('logout') }}">
               @csrf

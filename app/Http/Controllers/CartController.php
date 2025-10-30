@@ -14,12 +14,59 @@ class CartController extends Controller
 {
 
     // 🛒 Add to Cart
-    public function addToSession22(Request $request)
-    {
-        
-        $product = Product::findOrFail($request->product_id);
-        $cart = session()->get('cart', []);
+ 
 
+    // 🛒 Add to Cart
+    public function addToCart(Request $request)
+{
+    $request->validate([
+        'product_id' => 'required|integer',
+        'quantity' => 'required|integer|min:1',
+    ]);
+
+    $product = Product::findOrFail($request->product_id);
+    $userId = Auth::id();
+
+    $cartitem = CartItem::where('user_id', $userId)
+            ->first();
+
+
+    if($cartitem){
+        $existingBazarId = $cartitem->product->bazar_id;
+        $currentBazarId = $product->bazar_id;
+
+        if ($existingBazarId && $existingBazarId != $currentBazarId) {
+
+                return response()->json([
+                    'status' => 'confirm_clear',
+                    'message' => 'আপনার ব্যাগে <b style="color:#ef4444;">' . e($cartitem->product->bazar->name) . '</b> এর পণ্য আছে। 
+                                আপনি কি নতুন করে <b style="color:#16a34a;">' . e($product->bazar->name) . '</b> থেকে শুরু করতে চান?',
+                ]);
+
+        }
+    }
+
+
+    if ($userId) {
+        // Logged in user → Save in DB
+        $existing = CartItem::where('user_id', $userId)
+            ->where('product_id', $product->id)
+            ->first();
+
+        if ($existing) {
+            $existing->quantity += $request->quantity;
+            $existing->save();
+        } else {
+            CartItem::create([
+                'user_id' => $userId,
+                'product_id' => $product->id,
+                'quantity' => $request->quantity,
+                'price' => $product->price,
+            ]);
+        }
+    } else {
+        // Guest user → store in session
+        $cart = session()->get('cart', []);
         if (isset($cart[$product->id])) {
             $cart[$product->id]['quantity'] += $request->quantity;
         } else {
@@ -30,62 +77,60 @@ class CartController extends Controller
                 'image' => $product->image
             ];
         }
-
         session()->put('cart', $cart);
-
-        return response()->json(['success' => true, 'message' => 'পণ্যটি কার্টে যোগ হয়েছে!']);
     }
 
-    // 🛒 Add to Cart
-    public function addToCart(Request $request)
-    {
-        $request->validate([
-            'product_id' => 'required|integer',
-            'quantity' => 'required|integer|min:1',
-        ]);
+    return response()->json([
+        'success' => true,
+        'message' => 'পণ্যটি আপনার ব্যাগে যোগ হয়েছে!',
+    ]);
+}
 
-        $product = Product::findOrFail($request->product_id);
-        $userId = Auth::id();
+ 
 
-        if (auth()->check()) {
-            $cartItem = CartItem::updateOrCreate(
-                ['user_id' => $userId, 'product_id' => $product->id],
-                [
-                    'quantity' => \DB::raw('quantity + '.$request->quantity),
-                    'price' => $product->price
-                ]
-            );
+public function clearAndAdd(Request $request)
+{
+    $userId = Auth::id();
+    $product = Product::findOrFail($request->product_id);
+     CartItem::where('user_id', $userId)
+            ->delete();
+ 
+
+    if ($userId) {
+        // Logged in user → Save in DB
+        $existing = CartItem::where('user_id', $userId)
+            ->where('product_id', $product->id)
+            ->first();
+
+        if ($existing) {
+            $existing->quantity += $request->quantity;
+            $existing->save();
         } else {
-            // 🧠 Guest user — store in session
-            $cart = session()->get('cart', []);
-            if (isset($cart[$product->id])) {
-                $cart[$product->id]['quantity'] += $request->quantity;
-            } else {
-                $cart[$product->id] = [
-                    'name' => $product->name,
-                    'price' => $product->price,
-                    'quantity' => $request->quantity,
-                    'image' => $product->image
-                ];
-            }
-            session()->put('cart', $cart);
+            CartItem::create([
+                'user_id' => $userId,
+                'product_id' => $product->id,
+                'quantity' => $request->quantity?? 22,
+                'price' => $product->price,
+            ]);
         }
-
-        return response()->json(['success' => true, 'message' => 'পণ্যটি কার্টে যোগ হয়েছে!']);
+    } else {
+        // Guest user → store in session
+        $cart = session()->get('cart', []);
+        if (isset($cart[$product->id])) {
+            $cart[$product->id]['quantity'] += $request->quantity;
+        } else {
+            $cart[$product->id] = [
+                'name' => $product->name,
+                'price' => $product->price,
+                'quantity' => $request->quantity,
+                'image' => $product->image
+            ];
+        }
+        session()->put('cart', $cart);
     }
 
-
-// public function sessionViewCart()
-// {
-//     $userId = Auth::id();
-//     if ($userId) {
-//         $cartItems = CartItem::where('user_id', $userId)->get();
-//     } else {
-//         $cartItems = session('cart', []);
-//     }
-
-//     return view('cart.index', compact('cartItems'));
-// }
+    return response()->json(['status' => 'success', 'message' => 'নতুন বাজার ('.$product->bazar->name.') থেকে পণ্য যোগ হয়েছে!']);
+}
 
 
     // 🔢 Count total items
@@ -123,20 +168,43 @@ public function viewCardItems()
 {
     if (auth()->check()) {
         $userId = auth()->id();
-        $items = \App\Models\CartItem::with('product')->where('user_id', $userId)->get();
+        $items = CartItem::with('product')->where('user_id', $userId)->get();
         return response()->json([
             'source' => 'database',
             'items' => $items,
             'count' => $items->sum('quantity')
         ]);
     } else {
-        $cart = session()->get('cart', []);
+        $sessionCart = session('cart', []);
+ 
+
+        $productIds = array_keys($sessionCart);
+        $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
+
+        $cartItems = [];
+
+        foreach ($sessionCart as $productId => $item) {
+            if (isset($products[$productId])) {
+                $product = $products[$productId];
+                $cartItems[] = [
+                    'product_id' => $productId,
+                    'name' => $product->name,
+                    'image' => $product->image ?? null,
+                    'price' => $item['price'],
+                    'quantity' => $item['quantity'],
+                    'unit' => $product->unit ?? '',
+                ];
+            }
+        }
+       
+
         return response()->json([
             'source' => 'session',
-            'items' => $cart,
-            'count' => collect($cart)->sum('quantity')
+            'items' => $cartItems,
+            'count' => collect($cartItems)->sum('quantity')
         ]);
     }
+
 }
 
 // 🗑️ Remove item from session cart
@@ -162,7 +230,7 @@ public function removeSessionItem($productId)
 
     return response()->json([
         'success' => true,
-        'message' => '🗑️ পণ্যটি কার্ট থেকে মুছে ফেলা হয়েছে!',
+        'message' => '🗑️ পণ্যটি ব্যাগ থেকে সরিয়ে ফেলা হয়েছে!',
         'cart' => $cart
     ]);
 }
@@ -202,19 +270,22 @@ public function destroy(Request $request)
 }
 
 
-public function placeOrder(Request $request)
+public function saveOrder(Request $request)
 {
+ 
 
-    if (!Auth::check()) {
-        return redirect()->route('login')->with('error', 'অর্ডার করতে, আগে সিস্টেমে লগইন করুন!');
+    if (!auth()->check()) {
+        session(['url.intended' => url()->current()]);
+        return redirect('/login');
     }
+
  
 
     $user = Auth::user();
     $cartItems = CartItem::where('user_id', $user->id)->get();
 
     if ($cartItems->isEmpty()) {
-        return back()->with('error', 'আপনার কার্ট খালি।');
+        return back()->with('error', 'আপনার ব্যাগ খালি।');
     }
 
     $totalAmount = $cartItems->sum(function($item) {
@@ -263,13 +334,14 @@ public function placeOrder(Request $request)
             }
         }
     }
-
-
-
-
+ 
 
     // Clear cart
     CartItem::where('user_id', $user->id)->delete();
+
+    // ✅ Optional: session clear করলেও সমস্যা নেই
+    session()->forget(['cart', 'bazar_id']);
+
 
     // Redirect with order details
     return redirect()->route('home.order.done')->with([

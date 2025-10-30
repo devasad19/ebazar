@@ -5,7 +5,7 @@
 
     @if(count($cartItems) > 0)
             <!-- ✅ Full form starts -->
-        <form action="{{ route('place.order') }}" method="POST" class="space-y-6">
+        <form action="{{ route('save.order') }}" method="POST" class="space-y-6">
             @csrf
     <div class="bg-white rounded-2xl shadow p-6 mb-6">
         <h3 class="text-xl font-semibold text-gray-700 mb-4">আপনার পণ্যসমূহ</h3>
@@ -36,13 +36,13 @@
 
     <!-- Price Info -->
     <div class="flex flex-col items-center w-1/4">
-        <p class="text-green-600 text-sm">৳{{ $cart->price }} x <span class="itemQty">{{ $cart->quantity }}</span></p>
+        <p class="text-green-600 text-sm">৳{{ bnNum($cart->price) }} x <span class="itemQty">{{ $cart->quantity }}</span></p>
         <p></p>
     </div>
     
     <!-- Remove Button -->
     <div class="flex3 items-center text-right justify-end w-1/6">
-        <p class="text-green-700 font-semibold text-base itemTotal">৳{{ $cart->price * $cart->quantity }}</p>
+        <p class="text-green-700 font-semibold text-base itemTotal">৳{{ bnNum($cart->price * $cart->quantity) }}</p>
         <button type="button" class="text-red-500 hover:text-red-700 text-lg font-bold"
             onclick="removeItem(this)">❌</button>
     </div>

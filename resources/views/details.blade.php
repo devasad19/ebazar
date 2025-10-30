@@ -30,7 +30,7 @@
           <p class="text-lg text-gray-600 mb-3">{{ $product->short_description ?? 'বিবরণ নেই' }}</p>
 
           <div class="mb-4">
-            <p class="text-2xl font-bold text-green-600 mb-1">৳{{ $product->price }} / {{ $product->unit }}</p>
+            <p class="text-2xl font-bold text-green-600 mb-1">৳{{ bnNum($product->price) }} / {{ $product->unit }}</p>
             <p class="text-sm text-gray-500">বিতরণকারী:
               <span class="font-semibold text-gray-700">ফ্রি আছে, অর্ডার করুন, ইন শা আল্লাহ্‌।</span>
             </p>
@@ -57,7 +57,7 @@
                       onclick="increaseQty(this)">+</button>
             </div>
 
-            <button class="addToCartBtn bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition"
+            <button class="addToCartBtn bg-green-600 text-white px-6 py-2 text-sm rounded-lg hover:bg-green-700 transition"
                     data-id="{{ $product->id }}"
                     data-name="{{ $product->name }}"
                     data-price="{{ $product->price }}"
@@ -81,20 +81,26 @@
     <div class="bg-white rounded-2xl shadow p-5">
       <h3 class="text-xl font-bold text-green-700 mb-4 flex items-center gap-2">🛒 অন্যান্য পণ্য</h3>
 
-      @forelse($relatedProducts as $item)
+      @forelse($othersProducts as $item)
         <div class="flex items-center gap-3 border border-gray-100 rounded-xl p-3 hover:shadow-md transition w-full bg-white mb-3">
           <img src="{{ url('uploads/products/'.$item->image) }}"
               alt="{{ $item->name }}" class="w-20 h-20 rounded-lg object-cover flex-shrink-0">
           <div class="flex flex-col justify-between w-full">
             <div>
               <h4 class="font-semibold text-gray-800">{{ $item->name }}</h4>
-              <p class="text-green-600 font-medium text-sm">৳{{ $item->price }} / {{ $item->unit }}</p>
-            </div>
-            <div class="flex items-center justify-between gap-3 mt-1">
+              <p class="text-green-600 font-medium text-sm">৳{{ bnNum($product->price) }} / {{ $item->unit }}</p>
               <p class="text-xs text-gray-500">বাজার: {{ optional($item->bazar)->name ?? 'N/A' }}</p>
-              <a href="{{ route('home.product.details', $item->id) }}" class="text-xs text-green-600 hover:underline whitespace-nowrap">
-                বিস্তারিত দেখুন →
-              </a>
+            </div>
+            <div class="flex justify-between items-center mt-2">
+                <button class="addToCartBtn inline-block bg-indigo-600 hover:bg-indigo-700 text-sm text-white py-2 px-3 rounded-lg text-sm"
+                      data-id="{{ $product->id }}"
+                      data-name="{{ $product->name }}"
+                      data-price="{{ $product->price }}"
+                      data-image="{{ url('uploads/products/'.$product->image) }}">
+                🛒 ব্যাগে যোগ করুন
+              </button>
+              <a href="{{ route('home.product.details', $product->id) }}"  class="inline-block text-sm bg-green-600 text-white py-2 px-3 rounded-lg hover:bg-green-700 transition text-center">
+                বিস্তারিত </a>
             </div>
           </div>
         </div>
@@ -114,76 +120,38 @@
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      
-      <!-- Product Card -->
-      <div class="bg-white rounded-xl shadow hover:shadow-lg transition p-4 relative group">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbC47y2YlKDgBzBmLitYb75dDU6F028k7oGQ&s" 
-             alt="সবজি" 
-             class="rounded-lg w-full h-44 object-cover group-hover:scale-105 transition duration-300">
-        <button class="absolute top-3 right-3 bg-white p-2 rounded-full shadow hover:text-red-500">
-          ❤️
-        </button>
-        <div class="mt-4">
-          <h4 class="font-bold text-lg">তাজা টমেটো</h4>
-          <p class="text-green-600 font-semibold">৳৮০ / কেজি</p>
-          <p class="text-sm text-gray-500">বাজার: সাভার বাজার</p>
-          <button class="bg-green-600 text-white w-full py-2 rounded-lg hover:bg-green-700 transition mt-2">
-            বিস্তারিত দেখুন
+        @forelse($relatedProducts as $product)
+        <!-- Product Card -->
+        <div class="bg-white rounded-xl shadow hover:shadow-lg transition p-4 relative group">
+          <img src="{{ $product->image? url('uploads/products/'.$product->image): url('public/default/img.jpg') }}" 
+              alt="{{ $product->name }}" 
+              class="rounded-lg w-full h-44 object-cover group-hover:scale-105 transition duration-300">
+          <button class="absolute top-3 right-3 bg-white p-2 rounded-full shadow hover:text-red-500">
+            ❤️
           </button>
+          <div class="mt-4">
+            <h4 class="font-bold text-lg">{{ $product->name }}</h4>
+            <p class="text-green-600 font-semibold">৳{{ bnNum($product->price) }} / {{ $product->unit }}</p>
+            বাজার:  {{ optional($product->bazar)->name ?? 'N/A' }}
+            <div class="flex justify-between items-center mt-2">
+                <button class="addToCartBtn inline-block bg-indigo-600 hover:bg-indigo-700 text-sm text-white py-2 px-3 rounded-lg text-sm"
+                      data-id="{{ $product->id }}"
+                      data-name="{{ $product->name }}"
+                      data-price="{{ $product->price }}"
+                      data-image="{{ url('uploads/products/'.$product->image) }}">
+                🛒 ব্যাগে যোগ করুন
+              </button>
+              <a href="{{ route('home.product.details', $product->id) }}"  class="inline-block text-sm bg-green-600 text-white py-2 px-3 rounded-lg hover:bg-green-700 transition text-center">
+                বিস্তারিত </a>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <div class="bg-white rounded-xl shadow hover:shadow-lg transition p-4 relative group">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTyXv5xbCdfaQISj6ljP_klkXK9PKpqyCx9dA&s" 
-             alt="সবজি" 
-             class="rounded-lg w-full h-44 object-cover group-hover:scale-105 transition duration-300">
-        <button class="absolute top-3 right-3 bg-white p-2 rounded-full shadow hover:text-red-500">
-          ❤️
-        </button>
-        <div class="mt-4">
-          <h4 class="font-bold text-lg">পটল</h4>
-          <p class="text-green-600 font-semibold">৳৫০ / কেজি</p>
-          <p class="text-sm text-gray-500">বাজার: রাজশাহী বাজার</p>
-           <p class="text-xs text-gray-500">বিতরণকারী: হোসেন আলি</p>
-          <button class="bg-green-600 text-white w-full py-2 rounded-lg hover:bg-green-700 transition mt-2">
-            বিস্তারিত দেখুন
-          </button>
+      @empty
+        <div class="col-span-4 text-center text-gray-500 py-10">
+          🚫 কোনো পণ্য পাওয়া যায়নি।
         </div>
-      </div>
-      <div class="bg-white rounded-xl shadow hover:shadow-lg transition p-4 relative group">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbC47y2YlKDgBzBmLitYb75dDU6F028k7oGQ&s" 
-             alt="সবজি" 
-             class="rounded-lg w-full h-44 object-cover group-hover:scale-105 transition duration-300">
-        <button class="absolute top-3 right-3 bg-white p-2 rounded-full shadow hover:text-red-500">
-          ❤️
-        </button>
-        <div class="mt-4">
-          <h4 class="font-bold text-lg">তাজা টমেটো</h4>
-          <p class="text-green-600 font-semibold">৳৮০ / কেজি</p>
-          <p class="text-sm text-gray-500">বাজার: সাভার বাজার</p>
-           <p class="text-xs text-gray-500">বিতরণকারী: হোসেন আলি</p>
-          <button class="bg-green-600 text-white w-full py-2 rounded-lg hover:bg-green-700 transition mt-2">
-            বিস্তারিত দেখুন
-          </button>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl shadow hover:shadow-lg transition p-4 relative group">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTyXv5xbCdfaQISj6ljP_klkXK9PKpqyCx9dA&s" 
-             alt="সবজি" 
-             class="rounded-lg w-full h-44 object-cover group-hover:scale-105 transition duration-300">
-        <button class="absolute top-3 right-3 bg-white p-2 rounded-full shadow hover:text-red-500">
-          ❤️
-        </button>
-        <div class="mt-4">
-          <h4 class="font-bold text-lg">পটল</h4>
-          <p class="text-green-600 font-semibold">৳৫০ / কেজি</p>
-          <p class="text-sm text-gray-500">বাজার: রাজশাহী বাজার</p>
-           <p class="text-xs text-gray-500">বিতরণকারী: হোসেন আলি</p>
-          <button class="bg-green-600 text-white w-full py-2 rounded-lg hover:bg-green-700 transition mt-2">
-            বিস্তারিত দেখুন
-          </button>
-        </div>
-      </div>
+      @endforelse
+     
 
     </div>
 

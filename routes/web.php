@@ -31,6 +31,7 @@ use App\Http\Controllers\Auth\LoginController;
 
 // routes/web.php
     Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');
+    Route::post('/barazid/clear/add', [CartController::class, 'clearAndAdd'])->name('bazarid.clear.add');
     // Route::get('/view/cart', [CartController::class, 'sessionViewCart'])->name('session.view.cart');
     Route::get('/cart/fetch', [CartController::class, 'viewCardItems'])->name('cart.fetch');
     Route::post('/cart/remove/{id}', [CartController::class, 'removeSessionItem'])->name('cart.remove');
@@ -39,7 +40,7 @@ use App\Http\Controllers\Auth\LoginController;
     
     Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
      
-    Route::post('/save-order', [CartController::class, 'placeOrder'])->name('place.order');
+    Route::post('/save-order', [CartController::class, 'saveOrder'])->name('save.order');
 
     
 Route::prefix('rider')->middleware(['auth','role:rider'])->group(function () {
@@ -65,7 +66,7 @@ Route::prefix('rider')->middleware(['auth','role:rider'])->group(function () {
 Route::get('/register-user', [RegisterController::class, 'create'])->name('user.register');
 Route::post('/register-user', [RegisterController::class, 'store'])->name('user.register.store');
 
-Route::get('rider/{id}', [HomeController::class, 'frontdRiderDetails'])->name('riders.show');
+Route::get('rider/{id}', [HomeController::class, 'riderProfile'])->name('riders.show');
 
 Route::get('place-order', [HomeController::class, 'homePlaceOrder'])->name('home.place.order');
 Route::get('order-success', [HomeController::class, 'homeOrderDone'])->name('home.order.done');

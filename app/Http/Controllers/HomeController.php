@@ -30,7 +30,7 @@ class HomeController extends Controller
     public function frontdHome(){
         $data['bazars'] = Bazar::where('status', 'Active')->get();
         $data['categories'] = Category::where('status', 'Active')->get();
-        $data['riders'] = Rider::where('status', 'Active')->get();
+        $data['riders'] = Rider::where('status', 'Active')->take(4)->get();
 
         
         $data['user'] = Auth::user();
@@ -47,6 +47,7 @@ class HomeController extends Controller
         // Auth::logout();
         // return redirect('/login');
 
+
         return view('front_index', $data);
     }
 
@@ -55,9 +56,9 @@ class HomeController extends Controller
     {
         $query = Product::query()->with(['bazar', 'category'])->where('status', 'active');
  
-$data['keyword'] = '';
-$data['bazar_id'] = '';
-$data['category_id'] = '';
+        $data['keyword'] = '';
+        $data['bazar_id'] = '';
+        $data['category_id'] = '';
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
             $data['category_id'] = $request->category_id;
@@ -128,13 +129,22 @@ public function frontdProductDetails($id)
                         ->latest()
                         ->take(5)
                         ->get();
+
+            
+            $data['othersProducts'] = Product::where('bazar_id', $data['product']->bazar_id)
+                ->where('category_id', '!=', $data['product']->category_id)
+                ->where('id', '!=', $data['product']->id)
+                ->take(4)
+                ->get();
+
+
     // সম্পর্কিত পণ্য (same bazar এর)
-    $data['relatedProducts'] = Product::where('bazar_id', $data['product']->bazar_id)
+    $data['relatedProducts'] = Product::where(['bazar_id' => $data['product']->bazar_id, 'category_id' => $data['product']->category_id])
                         ->where('id', '!=', $data['product']->id)
                         ->take(4)
                         ->get();
 
-
+ 
     return view('details', $data);
 }
 
@@ -156,15 +166,20 @@ public function riderProfile($id)
 public function homePlaceOrder()
 {
 
-    if (!Auth::check()) {
-        return redirect()->route('login')->with('error', 'অর্ডার দিতে হলে আগে লগইন করুন!');
+    if (!auth()->check()) {
+        session(['url.intended' => url()->current()]);
+        return redirect('/login');
     }
+
 
     $user = Auth::user();
     // ✅ ডাটাবেস থেকে কার্ট আইটেম আনা
-    $cartItems = CartItem::with(['user', 'product'])
-        ->where('user_id', $user->id)
-        ->get();
+ 
+
+    $cartItems = auth()->check()
+        ? CartItem::where('user_id', auth()->id())->with(['user', 'product'])->get()
+        : collect(session()->get('cart', []));
+    
     $extraProducts = [];
     $total = $cartItems->sum(fn($item) => $item->product->price * $item->quantity);
 
@@ -184,9 +199,7 @@ public function homePlaceOrder()
 
         return view('order_success', compact('cartItems', 'total'));
     }
-
-
-
+ 
 
 
 

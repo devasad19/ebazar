@@ -17,11 +17,12 @@
     <div class="max-w-7xl mx-auto flex justify-between items-center px-4 py-3">
 
         {{-- Logo --}}
-        <h1 class="text-3xl font-bold text-green-600">
-            eBazar<span class="text-gray-800">.com</span>
-        </h1>
-
-        {{-- Navbar Links --}}
+        <a href="{{ route('front_home') }}">
+          <h1 class="text-3xl font-bold text-green-600">
+              eBazar<span class="text-gray-800">.com</span>
+          </h1>
+        </a>
+ 
         <nav class="hidden md:flex space-x-6 text-sm font-medium">
             <a href="{{ route('front_home') }}" class="hover:text-green-600 transition">হোম</a>
             <a href="" class="hover:text-green-600 transition">বাজার</a>
@@ -36,16 +37,24 @@
             @auth
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open" class="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-lg hover:bg-gray-200 transition">
-                        <img src="{{ auth()->user()->photo ? asset('storage/' . auth()->user()->photo) : asset('default-user.png') }}" 
+                        <img src="{{ auth()->user()->photo ? url('uploads/users/' . auth()->user()->photo) : url('public/default/user.jpg') }}" 
                              class="w-8 h-8 rounded-full object-cover" alt="profile">
                         <span class="text-sm font-medium">{{ auth()->user()->name }}</span>
-                        <span class="text-xs text-gray-500">{{ auth()->user()->role->name ?? 'User' }}</span>
+                        <span class="text-xs text-gray-500">{{ auth()->user()->role->name ?? '' }}</span>
                     </button>
 
-                    {{-- Dropdown --}}
                     <div x-show="open" @click.outside="open = false" 
                          class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg py-2 z-50">
-                        <a href="" class="block px-4 py-2 text-sm hover:bg-gray-100">প্রোফাইল</a>
+                         <a href="{{ auth()->user()->role->name }}/dashboard" class="block px-4 py-2 text-sm hover:bg-gray-100">ড্যাশবোর্ড</a>
+                         @if (auth()->user()->role->name == 'user')
+                          <a href="user/dashboard/my-orders" class="block px-4 py-2 text-sm hover:bg-gray-100">আমার অর্ডার</a>
+                           
+                         @endif
+
+
+
+
+
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
@@ -66,7 +75,7 @@
 
             {{-- Cart --}}
             <button id="cartButton" class="relative bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-                🛒 কার্ট
+                🛒 আমার ব্যাগ
                 <span id="cartCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">0</span>
             </button>
         </div>
@@ -90,10 +99,9 @@
 
 
   <!-- 🛍️ Cart Modal -->
-<div id="cartModal"
-  class="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center opacity-0 pointer-events-none transition-opacity duration-300 z-50">
+<div id="cartModal" class="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center opacity-0 pointer-events-none transition-opacity duration-300 z-50">
   <div class="bg-white w-96 rounded-2xl shadow-lg p-5 relative">
-    <h3 class="text-xl font-bold text-green-700 mb-4">🛒 আপনার কার্ট</h3>
+    <h3 class="text-xl font-bold text-green-700 mb-4">🛒 আপনার বাজার ব্যাগ</h3>
 
     <div id="cartItems" class="space-y-3 max-h-60 overflow-y-auto">
       <!-- JS দিয়ে কার্ট আইটেম এখানে আসবে -->
@@ -166,75 +174,108 @@
 
 
 <script>
+ 
+
+
+
 // ✅ Add to Cart (DB-based)
 document.addEventListener("DOMContentLoaded", function() {
 
   // Add to cart
   document.querySelectorAll('.addToCartBtn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const productId = this.dataset.id;
-      const quantity = this.closest('div').querySelector('input[type=number]').value;
+  btn.addEventListener('click', async function () {
+    const productId = this.dataset.id;
+    const input = this.closest('div')?.querySelector('input[type=number]');
+    const quantity = input ? parseFloat(input.value) || 1 : 1;
 
-      fetch('{{ route("cart.add") }}', {
+
+    try {
+      // 🧠 Step 1: Send Add-to-Cart request
+      const res = await fetch('{{ route("cart.add") }}', {
         method: 'POST',
         headers: {
           'X-CSRF-TOKEN': '{{ csrf_token() }}',
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          product_id: productId,
-          quantity: quantity
-        })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          console.log(data.success);
-          
-          Swal.fire({
-            title: '✅ কার্টে যোগ হয়েছে!',
-            text: data.message,
-            icon: 'success',
-            confirmButtonColor: '#16a34a',
-            confirmButtonText: 'ঠিক আছে'
-          });
-          renderCart();
-          updateCartCount();
-        } else {
-          Swal.fire({
-            title: '⚠️ সতর্কতা!',
-            text: data.message,
-            icon: 'warning',
-            confirmButtonColor: '#f59e0b',
-          });
-        }
-      })
-      .catch(() => {
-        Swal.fire({
-          title: '❌ ত্রুটি!',
-          text: 'কার্টে যোগ করা যায়নি। পরে চেষ্টা করুন।',
-          icon: 'error',
-          confirmButtonColor: '#ef4444',
-        });
+        body: JSON.stringify({ product_id: productId, quantity })
       });
-    });
-    
+
+      const data = await res.json();
+
+      // 🧩 Step 2: Handle special "confirm_clear" response
+      if (data.status === 'confirm_clear') {
+        const userConfirmed = await Swal.fire({
+          title: '⚠️ ব্যাগে ভিন্ন বাজারের পণ্য রয়েছে!',
+          html: data.message,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'হ্যাঁ, মুছে নতুনভাবে যোগ করুন',
+          cancelButtonText: 'না, বাতিল',
+          confirmButtonColor: '#16a34a',
+          cancelButtonColor: '#d33',
+        });
+
+        if (userConfirmed.isConfirmed) {
+            const clearUrl = '{{ route("bazarid.clear.add") }}';
+
+            const clearRes = await fetch(clearUrl, {
+              method: 'POST',
+              headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ product_id: productId, quantity })
+            });
+
+
+          const response = await clearRes.json();
+
+          if (response.success) {
+            showAlert('✅ ব্যাগ আপডেট হয়েছে!', response.message, 'success');
+            refreshCartUI();
+          } else {
+            showAlert('⚠️ ত্রুটি!', response.message || 'ব্যাগ আপডেট করা যায়নি।', 'success');
+          }
+        }
+
+        return; // stop further execution
+      }
+
+      // ✅ Step 3: Normal success
+      if (data.success) {
+        showAlert('✅ ব্যাগে যোগ হয়েছে!', data.message, 'success');
+        refreshCartUI();
+      } else {
+        showAlert('⚠️ সতর্কতা!', data.message, 'warning');
+      }
+
+    } catch (error) {
+      console.error("Cart Add Error:", error);
+      showAlert('❌ ত্রুটি!', 'ব্যাগে যোগ করা যায়নি। পরে চেষ্টা করুন।', 'error');
+    }
   });
-
-
-
-
-     renderCart();
-
-
-
-
-  // Initial Load
-
-  updateCartCount();
 });
 
 
+    updateCartCount();
+
+});
+
+// ✅ Helper functions
+function showAlert(title, text, icon) {
+  Swal.fire({
+    title,
+    text,
+    icon,
+    confirmButtonColor: icon === 'success' ? '#16a34a' : '#ef4444',
+    confirmButtonText: 'ঠিক আছে',
+  });
+}
+
+function refreshCartUI() {
+  if (typeof renderCart === 'function') renderCart();
+  if (typeof updateCartCount === 'function') updateCartCount();
+}
  
 async function renderCart() {
   const cartContainer = document.getElementById('cartItems');
@@ -248,7 +289,7 @@ async function renderCart() {
 
     // যদি session খালি বা DB তে কিছু না থাকে
     if (!data.items || (Array.isArray(data.items) && !data.items.length) || Object.keys(data.items).length === 0) {
-      cartContainer.innerHTML = `<p class="text-gray-500 text-center py-3">🛒 আপনার কার্ট খালি</p>`;
+      cartContainer.innerHTML = `<p class="text-gray-500 text-center py-3">🛒 আপনার ব্যাগ খালি</p>`;
       cartTotal.textContent = '৳0';
       return;
     }

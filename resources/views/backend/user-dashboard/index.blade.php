@@ -31,7 +31,7 @@
             <div class="bg-white rounded-2xl shadow-md p-6 flex items-center justify-between border-l-4 border-green-500">
                 <div>
                     <h3 class="text-lg font-semibold text-gray-700">মোট অর্ডার</h3>
-                    <p class="text-3xl font-bold text-green-600">{{ $totalOrders }}</p>
+                    <p class="text-3xl font-bold text-green-600">{{ bnNum($totalOrders) }}</p>
                 </div>
                 <span class="text-4xl">📦</span>
             </div>
@@ -39,7 +39,7 @@
             <div class="bg-white rounded-2xl shadow-md p-6 flex items-center justify-between border-l-4 border-yellow-500">
                 <div>
                     <h3 class="text-lg font-semibold text-gray-700">অপেক্ষমান</h3>
-                    <p class="text-3xl font-bold text-yellow-500">{{ $pendingOrders }}</p>
+                    <p class="text-3xl font-bold text-yellow-500">{{ bnNum($pendingOrders) }}</p>
                 </div>
                 <span class="text-4xl">⏳</span>
             </div>
@@ -47,7 +47,7 @@
             <div class="bg-white rounded-2xl shadow-md p-6 flex items-center justify-between border-l-4 border-blue-500">
                 <div>
                     <h3 class="text-lg font-semibold text-gray-700">সম্পন্ন</h3>
-                    <p class="text-3xl font-bold text-blue-600">{{ $completedOrders }}</p>
+                    <p class="text-3xl font-bold text-blue-600">{{ bnNum($completedOrders) }}</p>
                 </div>
                 <span class="text-4xl">✅</span>
             </div>
@@ -80,14 +80,14 @@
                     </p>
                     <p><span class="font-semibold">নাম:</span> {{ $order->user->name }}</p>
                     <p><span class="font-semibold">তারিখ:</span> {{ $order->created_at->format('d M, Y h:i A') }}</p>
-                    <p><span class="font-semibold">মোট মূল্য:</span> ৳{{ number_format($order->total_amount, 2) }}</p>
+                    <p><span class="font-semibold">মোট মূল্য:</span> ৳{{ bnNum($order->total_amount, 2) }}</p>
                 </div>
 
                 <div class="mb-3">
                     <h5 class="font-semibold text-gray-700 mb-1">🛒 পণ্যসমূহ:</h5>
                     <ul class="text-sm text-gray-600 space-y-1">
                         @foreach($order->items as $item)
-                            <li>• {{ $item->product->name }} – {{ $item->quantity }} {{ $item->product->unit ?? 'টি' }}</li>
+                            <li>• {{ $item->product->name }} – {{ bnNum($item->quantity) }} {{ $item->product->unit ?? 'টি' }}</li>
                         @endforeach
                     </ul>
                 </div>

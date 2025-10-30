@@ -19,7 +19,7 @@
         <!-- 🆔 Order Details -->
         <div class="bg-gray-50 rounded-xl p-5 mb-6 text-left">
             <p class="text-gray-700"><span class="font-semibold">অর্ডার নম্বর:</span> #{{ session('orderId', '123456') }}</p>
-            <p class="text-gray-700"><span class="font-semibold">মোট:</span> ৳{{ session('total', 0) }}</p>
+            <p class="text-gray-700"><span class="font-semibold">মোট:</span> ৳{{ bnNum(session('total', 0)) }}</p>
             <p class="text-gray-700"><span class="font-semibold">ডেলিভারি ঠিকানা:</span> {{ session('address', 'রামাকানা, দুল্লা, চেচুয়ায় বাজার') }}</p>
             <p class="text-gray-700"><span class="font-semibold">মোবাইল নম্বর:</span> {{ session('phone', '০১২৪৭৮৮৫৫৫৫৫') }}</p>
         </div>

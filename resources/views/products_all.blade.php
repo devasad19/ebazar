@@ -46,10 +46,9 @@
                     <img src="{{ asset('uploads/products/'.$product->image) }}" alt="{{ $product->name }}" class="h-48 w-full object-cover">
                     <div class="p-4">
                         <h3 class="text-lg font-semibold text-gray-800">{{ $product->name }}</h3>
-                        <p class="text-green-700 font-bold mt-1">৳{{ number_format($product->price) }}</p>
+                        <p class="text-green-700 font-bold mt-1">৳{{ bnNum($product->price) }} / {{ $product->unit }}</p>
                         <p class="text-gray-500 text-sm mt-1">
                             বাজার: {{ $product->bazar->name ?? 'N/A' }}<br>
-                            রাইডার: {{ $product->rider->name ?? 'N/A' }}
                         </p>
                         <a href="#" class="mt-3 inline-block bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm">🛒 অর্ডার করুন</a>
                     </div>

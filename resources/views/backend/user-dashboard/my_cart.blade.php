@@ -11,11 +11,11 @@
 
         <!-- Top Bar -->
     @include('backend.patrials.top_bar')
-        <form action="{{ route('place.order') }}" method="POST" class="space-y-6">
+        <form action="{{ route('save.order') }}" method="POST" class="space-y-6">
     @csrf
         <!-- Content Body --> 
   <section class="bg-gray-50 p-6 rounded-2xl shadow">
-     <h2 class="text-2xl font-bold text-green-700 mb-6">🛒 আমার কার্ট</h2>
+     <h2 class="text-2xl font-bold text-green-700 mb-6">🛒 আমার বাজার ব্যাগ</h2>
         
     @if(count($cartItems) > 0)
         <div class="space-y-3">
@@ -44,13 +44,13 @@
 
     <!-- Price Info -->
     <div class="flex flex-col items-center w-1/4">
-        <p class="text-green-600 text-sm">৳{{ $cart->price }} x <span class="itemQty">{{ $cart->quantity }}</span></p>
+        <p class="text-green-600 text-sm">৳{{ bnNum($cart->price) }} x <span class="itemQty">{{ $cart->quantity }}</span></p>
         <p></p>
     </div>
     
     <!-- Remove Button -->
     <div class="flex3 items-center text-right justify-end w-1/6">
-        <p class="text-green-700 font-semibold text-base itemTotal">৳{{ $cart->price * $cart->quantity }}</p>
+        <p class="text-green-700 font-semibold text-base itemTotal">৳{{ bnNum($cart->price * $cart->quantity) }}</p>
         <button type="button" class="text-red-500 hover:text-red-700 text-lg font-bold"
             onclick="removeItem(this)">❌</button>
     </div>
@@ -135,7 +135,7 @@
         </div>
 
         @else
-        <p class="text-center text-gray-500 py-12">আপনার কার্ট খালি। 🛒</p>
+        <p class="text-center text-gray-500 py-12">আপনার বাজার ব্যাগ খালি। 🛒</p>
         @endif
 
     </form>

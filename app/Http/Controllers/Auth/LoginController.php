@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Validation\ValidationException;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\CartItem;
 
 class LoginController extends Controller
 {
@@ -31,7 +32,6 @@ class LoginController extends Controller
         return 'phone';
     }
 
-
 public function login(Request $request)
 {
     $credentials = $request->validate([
@@ -41,29 +41,32 @@ public function login(Request $request)
 
     if (Auth::attempt($credentials, $request->filled('remember'))) {
         $request->session()->regenerate();
-
         $user = Auth::user();
 
-        // ✅ Guest session cart merge into database cart
+        // ✅ 1. পুরনো DB cart clear করুন
+        CartItem::where('user_id', $user->id)->delete();
+
+        // ✅ 2. Session cart → DB তে sync করুন (exact same)
         $sessionCart = session()->get('cart', []);
         if (!empty($sessionCart)) {
             foreach ($sessionCart as $productId => $item) {
-                \App\Models\CartItem::updateOrCreate(
-                    ['user_id' => $user->id, 'product_id' => $productId],
-                    [
-                        'quantity' => \DB::raw('quantity + ' . $item['quantity']),
-                        'price' => $item['price'],
-                    ]
-                );
+                CartItem::create([
+                    'user_id' => $user->id,
+                    'product_id' => $productId,
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
+                ]);
             }
-            session()->forget('cart'); // ✅ Clear guest cart after merge
         }
 
+        // ✅ 3. Login সফল হলে session clear করতে পারেন বা রাখতে পারেন
+        // session()->forget('cart'); // optional
 
- 
-        // ✅ Redirect logic
+        // ✅ 4. Redirect logic
         if (session()->has('url.intended')) {
-            return redirect()->intended();
+            $intendedUrl = session('url.intended');
+            session()->forget('url.intended');
+            return redirect()->to($intendedUrl);
         }
 
         switch ($user->role->name ?? '') {
@@ -83,15 +86,42 @@ public function login(Request $request)
     ]);
 }
 
-    /**
-     * Logout user
-     */
-    public function logout(Request $request)
-    {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+public function logout(Request $request)
+{
+    $user = Auth::user();
 
-        return redirect('/login');
+    // ✅ যদি user লগইন থাকে → তার DB cart session এ save করুন
+    if ($user) {
+        $dbCart = \App\Models\CartItem::where('user_id', $user->id)->get();
+
+        $sessionCart = [];
+        foreach ($dbCart as $item) {
+            $sessionCart[$item->product_id] = [
+                'quantity' => $item->quantity,
+                'price' => $item->price,
+            ];
+        }
+
+        // ✅ Save to session before logout
+        session(['cart' => $sessionCart]);
     }
+
+    // ✅ Logout safely
+    Auth::logout();
+    $request->session()->regenerateToken();
+
+    // ❌ invalidate ব্যবহার করলে session মুছে যাবে, তাই বাদ দিন
+    // $request->session()->invalidate();
+
+    return redirect('/login');
+}
+
+
+
+
+
+
+
+
+
 }
