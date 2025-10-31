@@ -10,4 +10,21 @@ class Bazar extends Model
     use HasFactory;
 
     protected $fillable = ['name', 'status'];
+
+
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
+
+    public function riders()
+    {
+        return $this->hasMany(User::class);
+    }
+
+
+
+
+
+
 }

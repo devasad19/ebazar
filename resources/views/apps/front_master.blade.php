@@ -12,91 +12,95 @@
 </head>
 <body class="bg-gray-50 text-gray-800">
 
-  <!-- 🔝 Navbar -->
+<!-- 🔝 Navbar -->
 <header class="bg-white shadow-md sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto flex justify-between items-center px-4 py-3">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
 
-        {{-- Logo --}}
-        <a href="{{ route('front_home') }}">
-          <h1 class="text-3xl font-bold text-green-600">
-              eBazar<span class="text-gray-800">.com</span>
-          </h1>
-        </a>
- 
-        <nav class="hidden md:flex space-x-6 text-sm font-medium">
-            <a href="{{ route('front_home') }}" class="hover:text-green-600 transition">হোম</a>
-            <a href="" class="hover:text-green-600 transition">বাজার</a>
-            <a href="" class="hover:text-green-600 transition">দোকানদার</a>
-            <a href="" class="hover:text-green-600 transition">যোগাযোগ</a>
-        </nav>
-
-        {{-- Right Section --}}
-        <div class="flex items-center gap-3">
-
-            {{-- Authenticated --}}
-            @auth
-                <div class="relative" x-data="{ open: false }">
-                    <button @click="open = !open" class="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-lg hover:bg-gray-200 transition">
-                        <img src="{{ auth()->user()->photo ? url('uploads/users/' . auth()->user()->photo) : url('public/default/user.jpg') }}" 
-                             class="w-8 h-8 rounded-full object-cover" alt="profile">
-                        <span class="text-sm font-medium">{{ auth()->user()->name }}</span>
-                        <span class="text-xs text-gray-500">{{ auth()->user()->role->name ?? '' }}</span>
-                    </button>
-
-                    <div x-show="open" @click.outside="open = false" 
-                         class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg py-2 z-50">
-                         <a href="{{ auth()->user()->role->name }}/dashboard" class="block px-4 py-2 text-sm hover:bg-gray-100">ড্যাশবোর্ড</a>
-                         @if (auth()->user()->role->name == 'user')
-                          <a href="user/dashboard/my-orders" class="block px-4 py-2 text-sm hover:bg-gray-100">আমার অর্ডার</a>
-                           
-                         @endif
+    <!-- 🌿 Logo -->
+    <a href="{{ route('front_home') }}" class="flex items-center">
+      <h1 class="text-2xl md:text-3xl font-bold text-green-600">
+        eBazar<span class="text-gray-800">.com</span>
+      </h1>
+    </a>
 
 
 
+    <!-- 🧭 Main Nav -->
+    <nav id="mobileMenu" 
+         class="max-h-0 overflow-hidden transition-all duration-500 ease-in-out md:max-h-none md:flex md:items-center md:space-x-6 md:static absolute md:static bg-white w-full md:w-auto left-0 top-[64px] md:top-auto border-b md:border-none shadow md:shadow-none flex-col md:flex-row text-sm font-medium">
 
+      <a href="{{ route('front_home') }}" class="block px-4 py-2 hover:text-green-600 transition">হোম</a>
+      <a href="{{ route('our.bazars') }}" class="block px-4 py-2 hover:text-green-600 transition">বাজার</a>
+      <a href="{{ route('our.policy') }}" class="block px-4 py-2 hover:text-green-600 transition">আমাদের নীতিমালা</a>
+      <a href="#" class="block px-4 py-2 hover:text-green-600 transition">যোগাযোগ</a>
 
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
-                                লগআউট
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            @else
-                {{-- Guest --}}
-                <a href="{{ route('login') }}" class="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition text-sm">
-                    লগইন / রেজিস্টার
-                </a>
-                <a href="{{ route('rider.register') }}" class="bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 transition text-sm">
-                    রাইডার নিবন্ধন
-                </a>
-            @endauth
+      <!-- 👇 Mobile view: Auth buttons -->
+      <div class="flex flex-col gap-2 md:hidden border-t pt-3 mt-2">
+        @guest
+          <a href="{{ route('login') }}" class="bg-green-600 text-white text-center px-5 py-2 rounded-lg hover:bg-green-700 transition text-sm">লগইন / রেজিস্টার</a>
+          <a href="{{ route('rider.register') }}" class="bg-indigo-600 text-white text-center px-5 py-2 rounded-lg hover:bg-indigo-700 transition text-sm">রাইডার নিবন্ধন</a>
+        @endguest
+      </div>
+    </nav>
 
-            {{-- Cart --}}
-            <button id="cartButton" class="relative bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-                🛒 আমার ব্যাগ
-                <span id="cartCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">0</span>
-            </button>
+    <!-- 🎯 Right Section -->
+    <div class="flex items-center gap-3">
+      @auth
+        <!-- Profile Dropdown -->
+        <div class="relative" x-data="{ open: false }">
+          <button @click="open = !open" class="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-lg hover:bg-gray-200 transition">
+            <img src="{{ auth()->user()->photo ? url('uploads/users/' . auth()->user()->photo) : url('public/default/user.jpg') }}" 
+                 class="w-8 h-8 rounded-full object-cover" alt="profile">
+            <div class="flex flex-col items-start">
+              <span class="text-sm font-medium">{{ auth()->user()->name }}</span>
+              <span class="text-xs text-gray-500">{{ auth()->user()->role->name ?? '' }}</span>
+            </div>
+          </button>
+
+          <!-- Dropdown Menu -->
+          <div x-show="open" @click.outside="open = false"
+               class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg py-2 z-50">
+            <a href="{{ auth()->user()->role->name }}/dashboard" class="block px-4 py-2 text-sm hover:bg-gray-100">ড্যাশবোর্ড</a>
+            @if (auth()->user()->role->name == 'user')
+              <a href="user/dashboard/my-orders" class="block px-4 py-2 text-sm hover:bg-gray-100">আমার অর্ডার</a>
+            @endif
+
+            <form method="POST" action="{{ route('logout') }}">
+              @csrf
+              <button type="submit" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+                লগআউট
+              </button>
+            </form>
+          </div>
         </div>
+      @else
+        <a href="{{ route('login') }}" class="hidden md:inline bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition text-sm">
+          লগইন / রেজিস্টার
+        </a>
+        <a href="{{ route('rider.register') }}" class="hidden md:inline bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 transition text-sm">
+          রাইডার নিবন্ধন
+        </a>
+      @endauth
+
+      <!-- 🛒 Cart Button (সব ভিউতে visible) -->
+      <button id="cartButton" class="relative bg-green-600 text-white px-1 py-1 rounded-lg hover:bg-green-700 transition">
+        🛒 ব্যাগ
+        <span id="cartCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">0</span>
+      </button>
+
+          <!-- 📱 Mobile Menu Toggle -->
+    <button id="menuToggle" class="md:hidden text-2xl text-gray-700 ml-2 focus:outline-none">
+      ☰
+    </button>
     </div>
+  </div>
 </header>
+
 
 
   @yield('content')
 
-
-
-
-
-  <!-- 🌱 Footer -->
-  <footer class="bg-gray-900 text-gray-300 text-center py-6">
-    <p>© ২০২৫ eBazar.com | আপনার বাজার, আপনার ঘরে 🏡</p>
-  </footer>
-
-
-
-
+ 
 
   <!-- 🛍️ Cart Modal -->
 <div id="cartModal" class="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center opacity-0 pointer-events-none transition-opacity duration-300 z-50">
@@ -124,12 +128,49 @@
 </div>
 
 
+
+  <!-- 🌱 Footer -->
+  <footer class="bg-gray-900 text-gray-300 text-center py-6">
+    <p>© ২০২৫ eBazar.com | আপনার বাজার, আপনার ঘরে 🏡</p>
+    <p>
+      <a href="{{ route('terms-and-conditions') }}" class="text-sm text-green-400 hover:text-green-300">টার্মস অ্যান্ড কন্ডিশন</a> ||
+      <a href="{{ route('privacy-policy') }}" class="text-sm text-green-400 hover:text-green-300">প্রাইভেসি পলিসি</a>
+    </p>
+  </footer>
+
+
+
+
+
+
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
 <!-- ✅ SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
- 
+
+
+<!-- 📜 JS for Mobile Menu (Smooth Animation) -->
+<script>
+const menuToggle = document.getElementById('menuToggle');
+const mobileMenu = document.getElementById('mobileMenu');
+let isOpen = false;
+
+menuToggle.addEventListener('click', () => {
+  isOpen = !isOpen;
+  if (isOpen) {
+    mobileMenu.classList.remove('max-h-0');
+    mobileMenu.classList.add('max-h-[500px]');
+  } else {
+    mobileMenu.classList.remove('max-h-[500px]');
+    mobileMenu.classList.add('max-h-0');
+  }
+});
+</script>
+
+
+
+
 <script>
 
     // 🔹 Common Swal Toast helper
@@ -296,6 +337,7 @@ async function renderCart() {
 
     let html = '';
     let total = 0;
+console.log(data.items);
 
     // ✅ Logged-in User (DB data)
     if (data.source === 'database') {
@@ -327,7 +369,7 @@ async function renderCart() {
               <p class="font-semibold text-gray-800">${item.name}</p>
               <p class="text-sm text-green-600">৳${item.price} × ${item.quantity}</p>
             </div>
-            <button class="text-red-500 hover:text-red-700 text-sm" onclick="removeSessionItemFromCart(${productId})">❌</button>
+            <button class="text-red-500 hover:text-red-700 text-sm" onclick="removeSessionItemFromCart(${item.product_id})">❌</button>
           </div>
         `;
       });
@@ -343,8 +385,8 @@ async function renderCart() {
 
 
 async function removeSessionItemFromCart(id) {
-  if (!confirm('আপনি কি নিশ্চিত এই পণ্যটি মুছে ফেলতে চান?')) return;
-
+ 
+  
   try {
     const url = `{{ route('cart.remove', ':id') }}`.replace(':id', id); // ✅ dynamic URL
 

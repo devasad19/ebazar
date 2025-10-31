@@ -27,6 +27,28 @@ class HomeController extends Controller
         return view('home');
     }
 
+    public function ourPolicy()
+    {
+        return view('our_policy');
+    }
+
+    public function ourBazarList()
+    {
+        $data['bazars'] = Bazar::get();
+
+        return view('bazars', $data);
+    }
+
+    public function privacyPolicy()
+    {
+        return view('privacy-policy');
+    }
+
+    public function termsAndConditions()
+    {
+        return view('terms-and-conditions');
+    }
+
     public function frontdHome(){
         $data['bazars'] = Bazar::where('status', 'Active')->get();
         $data['categories'] = Category::where('status', 'Active')->get();

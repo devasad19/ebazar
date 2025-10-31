@@ -25,6 +25,10 @@ use App\Http\Controllers\Auth\LoginController;
 
 
     Route::get('/', [HomeController::class, 'frontdHome'])->name('front_home');
+    Route::get('our/bazars', [HomeController::class, 'ourBazarList'])->name('our.bazars');
+    Route::get('our/policy', [HomeController::class, 'ourPolicy'])->name('our.policy');
+    Route::get('privacy-policy', [HomeController::class, 'privacyPolicy'])->name('privacy-policy');
+    Route::get('terms-and-conditions', [HomeController::class, 'termsAndConditions'])->name('terms-and-conditions');
     Route::get('/products/filter', [HomeController::class, 'filterProducts'])->name('products.filter');
     Route::get('product/{id}', [HomeController::class, 'frontdProductDetails'])->name('home.product.details');
     
@@ -99,7 +103,15 @@ Route::prefix('admin')->middleware(['auth','role:admin'])->group(function () {
 
     Route::post('/bazars/store', [BazarController::class, 'store'])->name('admin.bazars.store');
     Route::get('/bazars/{id}/edit', [BazarController::class, 'edit'])->name('admin.bazars.edit');
+    Route::post('/bazars/update', [BazarController::class, 'bazarUpdate'])->name('admin.bazars.update');
     Route::get('/bazars/{id}', [BazarController::class, 'destroy'])->name('bazar.delete');
+
+    Route::post('/admin/bazar/areas', [BazarController::class, 'getAreas'])->name('admin.bazar.areas');
+    Route::post('/bazars/areas/store', [BazarController::class, 'bazarAreastore'])->name('admin.bazar.areas.store');
+    Route::post('/bazars/areas/delete', [BazarController::class, 'bazarAreadestroy'])->name('admin.bazar.areas.delete');
+ 
+
+
 
     Route::get('/products', [ProductController::class, 'index'])->name('manage_products');
     Route::post('/products/store', [ProductController::class, 'store'])->name('admin.products.store');

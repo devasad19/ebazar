@@ -42,17 +42,36 @@
         @if($products->count())
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 @foreach($products as $product)
-                <div class="bg-white rounded-2xl shadow hover:shadow-lg transition overflow-hidden">
-                    <img src="{{ asset('uploads/products/'.$product->image) }}" alt="{{ $product->name }}" class="h-48 w-full object-cover">
-                    <div class="p-4">
-                        <h3 class="text-lg font-semibold text-gray-800">{{ $product->name }}</h3>
-                        <p class="text-green-700 font-bold mt-1">৳{{ bnNum($product->price) }} / {{ $product->unit }}</p>
-                        <p class="text-gray-500 text-sm mt-1">
-                            বাজার: {{ $product->bazar->name ?? 'N/A' }}<br>
-                        </p>
-                        <a href="#" class="mt-3 inline-block bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm">🛒 অর্ডার করুন</a>
-                    </div>
-                </div>
+      <div class="bg-white rounded-xl shadow hover:shadow-lg transition p-4 relative group">
+        <img src="{{ url('uploads/products/'.$product->image) }}" 
+             alt="{{ $product->name }}" 
+             class="rounded-lg w-full h-44 object-cover group-hover:scale-105 transition duration-300">
+        <button class="absolute top-3 right-3 bg-white p-2 rounded-full shadow hover:text-red-500">
+          ❤️
+        </button>
+        <div class="mt-4">
+           <a href="{{ route('home.product.details', $product->id) }}"  class="font-bold text-lg">{{ $product->name }}</a>
+          <p class="text-green-600 font-semibold">৳{{ bnNum($product->price) }} / {{ $product->unit }}</p>
+          <!-- <p class="text-sm text-gray-500">
+            বিতরণকারী: 
+            {{ optional($product->rider)->name ?? 'N/A' }}
+          </p> -->
+          <p class="text-sm text-gray-500 mb-3">
+            বাজার:  {{ optional($product->bazar)->name ?? 'N/A' }}
+          </p>
+          <div class="flex justify-between items-center">
+              <button class="addToCartBtn inline-block bg-indigo-600 hover:bg-indigo-700 text-sm text-white py-2 px-3 rounded-lg text-sm"
+                    data-id="{{ $product->id }}"
+                    data-name="{{ $product->name }}"
+                    data-price="{{ $product->price }}"
+                    data-image="{{ url('uploads/products/'.$product->image) }}">
+              🛒 ব্যাগে যোগ করুন
+            </button>
+            <a href="{{ route('home.product.details', $product->id) }}"  class="inline-block text-sm bg-green-600 text-white py-2 px-3 rounded-lg hover:bg-green-700 transition text-center">
+              বিস্তারিত </a>
+        </div>
+        </div>
+      </div>
                 @endforeach
             </div>
 
