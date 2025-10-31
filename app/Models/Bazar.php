@@ -22,6 +22,11 @@ class Bazar extends Model
         return $this->hasMany(User::class);
     }
 
+    public function areas()
+    {
+        return $this->hasMany(BazarArea::class);
+    }
+
 
 
 

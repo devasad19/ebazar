@@ -27,11 +27,12 @@ use App\Http\Controllers\Auth\LoginController;
     Route::get('/', [HomeController::class, 'frontdHome'])->name('front_home');
     Route::get('our/bazars', [HomeController::class, 'ourBazarList'])->name('our.bazars');
     Route::get('our/policy', [HomeController::class, 'ourPolicy'])->name('our.policy');
+    Route::get('contact-us', [HomeController::class, 'contactUs'])->name('contact_us');
     Route::get('privacy-policy', [HomeController::class, 'privacyPolicy'])->name('privacy-policy');
     Route::get('terms-and-conditions', [HomeController::class, 'termsAndConditions'])->name('terms-and-conditions');
     Route::get('/products/filter', [HomeController::class, 'filterProducts'])->name('products.filter');
     Route::get('product/{id}', [HomeController::class, 'frontdProductDetails'])->name('home.product.details');
-    
+    Route::post('/contact/submit', [HomeController::class, 'contactUsStore'])->name('contact.submit');
 
 // routes/web.php
     Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');

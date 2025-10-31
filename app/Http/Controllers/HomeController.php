@@ -10,6 +10,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\Bazar;
 use App\Models\CartItem;
+use App\Models\Contact;
 use App\Models\RiderProduct;
 use Auth;
 
@@ -42,6 +43,11 @@ class HomeController extends Controller
     public function privacyPolicy()
     {
         return view('privacy-policy');
+    }
+
+    public function contactUs()
+    {
+        return view('contact_us');
     }
 
     public function termsAndConditions()
@@ -208,8 +214,7 @@ public function homePlaceOrder()
     return view('place-order', compact('cartItems', 'total', 'user', 'extraProducts'));
 }
 
-
-
+ 
 
     public function homeOrderDone()
     {
@@ -222,7 +227,20 @@ public function homePlaceOrder()
         return view('order_success', compact('cartItems', 'total'));
     }
  
+        public function contactUsStore(Request $request)
+        {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+                'subject' => 'required|string|max:255',
+                'message' => 'required|string',
+            ]);
 
+            // ডাটাবেজে সংরক্ষণ
+            Contact::create($validated);
+
+            return back()->with('success', '✅ আপনার বার্তা সফলভাবে পাঠানো হয়েছে! আমরা শীঘ্রই যোগাযোগ করব।');
+        }
 
 
 

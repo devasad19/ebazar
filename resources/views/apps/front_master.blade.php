@@ -14,34 +14,67 @@
 
 <!-- 🔝 Navbar -->
 <header class="bg-white shadow-md sticky top-0 z-50">
-  <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+  <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
 
-    <!-- 🌿 Logo -->
-    <a href="{{ route('front_home') }}" class="flex items-center">
-      <h1 class="text-2xl md:text-3xl font-bold text-green-600">
-        eBazar<span class="text-gray-800">.com</span>
-      </h1>
+    <!-- 🌿 Logo --> 
+    
+<!-- 🌿 Logo -->
+    <a href="{{ route('front_home') }}" class="flex items-center space-x-2">
+      <img src="{{ url('public/default/new-logo.png') }}" alt="ই-বাজার" class="h-20 w-auto">
+      <!-- <span class="text-2xl font-bold text-green-700">ই-বাজার</span> -->
     </a>
+ 
 
 
 
-    <!-- 🧭 Main Nav -->
-    <nav id="mobileMenu" 
-         class="max-h-0 overflow-hidden transition-all duration-500 ease-in-out md:max-h-none md:flex md:items-center md:space-x-6 md:static absolute md:static bg-white w-full md:w-auto left-0 top-[64px] md:top-auto border-b md:border-none shadow md:shadow-none flex-col md:flex-row text-sm font-medium">
+<!-- 🧭 Main Navigation -->
+<nav id="mobileMenu"
+     class="max-h-0 overflow-hidden transition-all mt-3 duration-500 ease-in-out 
+            md:max-h-none md:flex md:items-center md:space-x-6
+            md:static absolute bg-white w-full md:w-auto left-0 top-[64px] md:top-auto 
+            border-b md:border-none shadow md:shadow-none 
+            flex-col md:flex-row text-sm font-medium md:bg-transparent z-40">
 
-      <a href="{{ route('front_home') }}" class="block px-4 py-2 hover:text-green-600 transition">হোম</a>
-      <a href="{{ route('our.bazars') }}" class="block px-4 py-2 hover:text-green-600 transition">বাজার</a>
-      <a href="{{ route('our.policy') }}" class="block px-4 py-2 hover:text-green-600 transition">আমাদের নীতিমালা</a>
-      <a href="#" class="block px-4 py-2 hover:text-green-600 transition">যোগাযোগ</a>
+  @php
+      $routes = [
+          ['name' => 'হোম', 'route' => route('front_home')],
+          ['name' => 'বাজার', 'route' => route('our.bazars')],
+          ['name' => 'আমাদের নীতিমালা', 'route' => route('our.policy')],
+          ['name' => 'যোগাযোগ', 'route' => route('contact_us')],
+      ];
+      $current = url()->current();
+  @endphp
 
-      <!-- 👇 Mobile view: Auth buttons -->
-      <div class="flex flex-col gap-2 md:hidden border-t pt-3 mt-2">
-        @guest
-          <a href="{{ route('login') }}" class="bg-green-600 text-white text-center px-5 py-2 rounded-lg hover:bg-green-700 transition text-sm">লগইন / রেজিস্টার</a>
-          <a href="{{ route('rider.register') }}" class="bg-indigo-600 text-white text-center px-5 py-2 rounded-lg hover:bg-indigo-700 transition text-sm">রাইডার নিবন্ধন</a>
-        @endguest
-      </div>
-    </nav>
+  @foreach($routes as $item)
+    <a href="{{ $item['route'] }}"
+       class="relative block px-4 py-2 md:px-3 md:py-2 mt-1 md:mt-0
+              text-gray-700 hover:text-green-700 transition font-medium
+              group {{ $current == $item['route'] ? 'text-green-700' : '' }}">
+       
+       {{ $item['name'] }}
+
+       <!-- underline animation -->
+       <span class="absolute left-0 bottom-0 w-0 h-[2px] bg-green-600 transition-all duration-300 group-hover:w-full {{ $current == $item['route'] ? 'w-full' : '' }}"></span>
+    </a>
+  @endforeach
+
+  <!-- 👇 Mobile view: Auth buttons -->
+  <div class="flex flex-col gap-2 md:hidden border-t pt-3 mt-3 w-full">
+    @guest
+      <a href="{{ route('login') }}" 
+         class="bg-green-600 text-white text-center px-5 py-2 rounded-lg hover:bg-green-700 transition text-sm">
+         লগইন / রেজিস্টার
+      </a>
+      <a href="{{ route('rider.register') }}" 
+         class="bg-indigo-600 text-white text-center px-5 py-2 rounded-lg hover:bg-indigo-700 transition text-sm">
+         রাইডার নিবন্ধন
+      </a>
+    @endguest
+  </div>
+</nav>
+
+
+
 
     <!-- 🎯 Right Section -->
     <div class="flex items-center gap-3">

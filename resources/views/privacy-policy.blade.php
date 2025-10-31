@@ -1,12 +1,12 @@
 @extends('apps.front_master')
 @section('content')
 
-<section class="max-w-4xl mx-auto px-6 py-8 text-center">
+<section class="max-w-4xl mx-auto px-3 py-8 text-center">
     <div class="bg-white rounded-2xl shadow p-5">
  
 
 
-<section class="bg-white rounded-2xl shadow p-8 space-y-6" aria-labelledby="privacy-heading">
+<section class="bg-white rounded-2xl  space-y-6" aria-labelledby="privacy-heading">
 <h1 id="privacy-heading" class="text-3xl font-extrabold text-gray-800">প্রাইভেসি পলিসি</h1>
 <p class="text-gray-600">eBazar.com গ্রাহকের ব্যক্তিগত তথ্য সংরক্ষণ ও সুরক্ষার ক্ষেত্রে প্রতিশ্রুতিবদ্ধ। এই পলিসি বিস্তারিতভাবে ব্যাখ্যা করে আমরা কোন তথ্য সংগ্রহ করি, কিভাবে ব্যবহার করি এবং আপনার অধিকার কী কী।</p>
 

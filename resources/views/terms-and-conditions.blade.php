@@ -1,12 +1,12 @@
 @extends('apps.front_master')
 @section('content')
 
-<section class="max-w-4xl mx-auto px-6 py-16 text-center">
+<section class="max-w-4xl mx-auto px-3 py-12 text-center">
     <div class="bg-white rounded-2xl shadow p-10">
  
 
 <!-- Terms and Conditions -->
-<section class="bg-white rounded-2xl shadow p-8" aria-labelledby="terms-heading">
+<section class="bg-white rounded-2xl " aria-labelledby="terms-heading">
 <h2 id="terms-heading" class="text-3xl font-extrabold text-gray-800">টার্মস অ্যান্ড কন্ডিশনস</h2>
 <p class="mt-2 text-gray-600">এই টার্মস অ্যান্ড কন্ডিশনসটি eBazar.com ব্যবহার করার সময় আপনার অধিকার এবং দায়িত্বগুলি বিস্তারিতভাবে ব্যাখ্যা করে। অনুগ্রহ করে মনোযোগ দিয়ে পড়ুন।</p>
 
@@ -38,41 +38,7 @@
 </section>
 
 
-<!-- Privacy Policy -->
-<section class="bg-white rounded-2xl shadow p-8" aria-labelledby="privacy-heading">
-<h2 id="privacy-heading" class="text-3xl font-extrabold text-gray-800">প্রাইভেসি পলিসি</h2>
-<p class="mt-2 text-gray-600">আমরা গ্রাহকের ব্যক্তিগত তথ্য সংরক্ষণ এবং সুরক্ষিত রাখার জন্য প্রতিশ্রুতিবদ্ধ। নীচের নির্দেশিকাগুলো বিস্তারিতভাবে আপনার অধিকার এবং আমাদের দায়িত্ব ব্যাখ্যা করে।</p>
-
-
-<div class="mt-6 space-y-4">
-<h3 class="text-xl font-semibold">১. তথ্য সংগ্রহ</h3>
-<p>আমরা শুধুমাত্র প্রয়োজনীয় তথ্য সংগ্রহ করি, যেমন: নাম, ঠিকানা, ফোন নম্বর, ইমেইল এবং অর্ডার সম্পর্কিত তথ্য। তথ্য সরবরাহ স্বেচ্ছাসেবক, তবে অর্ডার প্রক্রিয়ার জন্য প্রয়োজনীয়।</p>
-
-
-<h3 class="text-xl font-semibold">২. তথ্য ব্যবহার</h3>
-<p>আপনার তথ্য ব্যবহৃত হবে শুধুমাত্র ডেলিভারি, অর্ডার প্রক্রিয়া, পেমেন্ট, অফার ও গ্রাহক সাপোর্টের জন্য। কোনো তৃতীয় পক্ষের কাছে আপনার অনুমোদন ছাড়া তথ্য বিক্রি বা প্রদান করা হবে না।</p>
-
-
-<h3 class="text-xl font-semibold">৩. কুকি এবং অনলাইন ট্র্যাকিং</h3>
-<p>আমরা ওয়েবসাইটের কার্যকারিতা এবং ব্যবহারকারীর অভিজ্ঞতা উন্নয়নের জন্য কুকি ব্যবহার করতে পারি। এই কুকিগুলো ব্যবহারকারীর ব্যক্তিগত তথ্য সরাসরি সনাক্ত করে না।</p>
-
-
-<h3 class="text-xl font-semibold">৪. তথ্য সুরক্ষা</h3>
-<p>আমরা আপনার তথ্য সুরক্ষিত রাখার জন্য আধুনিক প্রযুক্তি এবং নিরাপত্তা ব্যবস্থা গ্রহণ করি। তবে ইন্টারনেটের মাধ্যমে সম্পূর্ণ নিরাপত্তা নিশ্চিত করা সম্ভব নয়, তাই তথ্য শেয়ার করার সময় সতর্ক থাকুন।</p>
-
-
-<h3 class="text-xl font-semibold">৫. গ্রাহকের অধিকার</h3>
-<ul class="list-disc list-inside text-gray-600">
-<li>আপনি চাইলে আপনার তথ্য সম্পাদনা বা মুছে ফেলার অনুরোধ করতে পারেন।</li>
-<li>অর্ডার ও যোগাযোগ সংক্রান্ত তথ্য শুধুমাত্র প্রয়োজন অনুযায়ী সংরক্ষিত হয়।</li>
-<li>আমাদের প্রাইভেসি পলিসি সম্পর্কে কোন প্রশ্ন থাকলে সরাসরি কাস্টমার সাপোর্টের সাথে যোগাযোগ করুন।</li>
-</ul>
-</div>
-
-
-<div class="mt-6 text-sm text-gray-500">এই পলিসি সময়ের সঙ্গে পরিবর্তিত হতে পারে। যে কোন পরিবর্তন ওয়েবসাইটে প্রকাশিত হালনাগাদের তারিখ অনুযায়ী কার্যকর হবে।</div>
-</section>
-
+ 
 
     
     </div>
