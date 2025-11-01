@@ -1,131 +1,140 @@
 @extends('apps.front_master')
 @section('content')
-<section class="max-w-4xl mx-auto px-6 py-8">
-    <h2 class="text-3xl font-bold text-green-700 mb-6 text-center">🛒 Checkout</h2>
 
-    @if(count($cartItems) > 0)
-            <!-- ✅ Full form starts -->
-        <form action="{{ route('save.order') }}" method="POST" class="space-y-6">
-            @csrf
-    <div class="bg-white rounded-2xl shadow p-6 mb-6">
-        <h3 class="text-xl font-semibold text-gray-700 mb-4">আপনার পণ্যসমূহ</h3>
+<section class="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+  <h2 class="text-2xl sm:text-3xl font-bold text-green-700 mb-6 text-center">🛒 অর্ডার পেজ</h2>
 
-        <div class="space-y-3">
-            @foreach($cartItems as $cart)
-<div class="cart-item flex justify-between items-center border-b pb-3 py-2 gap-4" data-product_id="{{ $cart->product_id }}" data-id="{{ $cart->id }}">
-    <!-- Product Info -->
-    <div class="flex items-center gap-3 w-1/3">
-        <img src="{{ $cart->product->image ? url('uploads/products/'.$cart->product->image) : '' }}"
-             class="w-16 h-16 object-cover rounded-lg">
-        <h4 class="font-semibold text-gray-800">{{ $cart->product->name }}</h4>
-    </div>
+  @if(count($cartItems) > 0)
+  <form action="{{ route('save.order') }}" method="POST" class="space-y-6">
+    @csrf
 
-    <!-- Quantity Control -->
-    <div class="flex items-center justify-center w-1/4">
-        <button type="button" 
-            class="bg-indigo-500 text-white px-3 py-1 rounded-l-full"
-            onclick="changeQty(this, 'decrease')">-</button>
-        <input type="number" 
-            value="{{ $cart->quantity }}" 
-            min="1"
-            class="w-16 text-center border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-300 py-1 mx-1 rounded">
-        <button type="button" 
-            class="bg-indigo-500 text-white px-3 py-1 rounded-r-full"
-            onclick="changeQty(this, 'increase')">+</button>
-    </div>
+    <!-- ✅ Cart Items -->
+    <div class="bg-white rounded-2xl shadow p-4 sm:p-6 mb-6">
+      <h3 class="text-xl font-semibold text-gray-700 mb-4">আপনার পণ্যসমূহ</h3>
 
-    <!-- Price Info -->
-    <div class="flex flex-col items-center w-1/4">
-        <p class="text-green-600 text-sm">৳{{ bnNum($cart->price) }} x <span class="itemQty">{{ $cart->quantity }}</span></p>
-        <p></p>
-    </div>
+      <div class="space-y-4">
+        @foreach($cartItems as $cart)
+ <div
+  class="cart-item border border-gray-100 rounded-xl p-2 sm:p-4 shadow-sm hover:shadow-md transition-all duration-200 space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between"
+  data-product_id="{{ $cart->product_id }}" data-id="{{ $cart->id }}"
+>
+  <!-- 🖼 Product Info (Top row) -->
+  <div class="flex items-center gap-3 w-full sm:w-1/3">
+    <img
+      src="{{ $cart->product->image ? url('uploads/products/'.$cart->product->image) : '' }}"
+      class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-xl border border-gray-200"
+      alt="product"
+    >
+    <h4 class="font-semibold text-gray-800 text-sm sm:text-base leading-tight">
+      {{ $cart->product->name }}
+    </h4>
+  </div>
+
+  <!-- 🔢 Bottom Row (Qty + Price + Remove) -->
+  <div class="flex justify-between items-center flex-wrap w-full sm:w-auto gap-3 sm:gap-6 mt-0 sm:mt-0">
     
-    <!-- Remove Button -->
-    <div class="flex3 items-center text-right justify-end w-1/6">
-        <p class="text-green-700 font-semibold text-base itemTotal">৳{{ bnNum($cart->price * $cart->quantity) }}</p>
-        <button type="button" class="text-red-500 hover:text-red-700 text-lg font-bold"
-            onclick="removeItem(this)">❌</button>
+    <!-- Quantity -->
+    <div class="flex items-center">
+      <button type="button"
+        class="bg-green-500 text-white px-3 py-1 rounded-l-full"
+        onclick="changeQty(this, 'decrease')">−</button>
+      <input type="number"
+        value="{{ $cart->quantity }}"
+        min="1"
+        class="w-14 text-center border border-gray-300 focus:ring-2 focus:ring-green-400 py-1  rounded">
+      <button type="button"
+        class="bg-green-500 text-white px-3 py-1 rounded-r-full"
+        onclick="changeQty(this, 'increase')">+</button>
     </div>
+
+    <!-- Price -->
+    <div class="text-center">
+      <p class="text-green-600 text-sm">
+        ৳{{ bnNum($cart->price) }} × <span class="itemQty">{{ $cart->quantity }}</span>
+      </p>
+      <p class="font-semibold text-green-700 itemTotal">
+        ৳{{ bnNum($cart->price * $cart->quantity) }}
+      </p>
+    </div>
+
+    <!-- Remove -->
+    <button type="button"
+      class="text-red-500 hover:text-red-700 text-xl font-bold"
+      onclick="removeItem(this)">❌</button>
+  </div>
 </div>
 
-            @endforeach
-        </div>
+        @endforeach
+      </div>
 
-            <!-- ✅ Custom Products Section (now inside form) -->
-            <div class="bg-gray-50 rounded-2xl border p-5  mt-3" id="customProductsSection">
-                <h3 class="text-lg font-semibold text-gray-700 mb-4 flex justify-between">
-                    <span>➕ কাস্টম পণ্য যোগ করুন</span>
-                    <button type="button" id="addCustomProduct"
-                        class="bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700 transition">+ নতুন পণ্য</button>
-                </h3>
-                <div id="customProductList" class="space-y-3 w-full"></div>
-                 
-            </div>
+      <!-- 🧩 Custom Product Section -->
+      <div class="bg-gray-50 rounded-2xl border p-4 mt-5" id="customProductsSection">
+        <h3 class="text-sm sm:text-lg font-semibold text-gray-700 mb-3 flex justify-between">
+          <span>➕ কাস্টম পণ্য যোগ করুন</span>
+          <button type="button" id="addCustomProduct"
+              class="bg-green-600 text-sm md:text-md sm:text-lg text-white px-3 py-1 rounded-lg hover:bg-green-700 transition">+ নতুন পণ্য</button>
+        </h3>
+        <div id="customProductList" class="space-y-3 w-full"></div>
+      </div>
 
-            <input type="hidden" id="baseTotal" value="{{ $total }}">
-<input type="hidden" id="customTotal" name="customTotal" value="0">
+      <input type="hidden" id="baseTotal" value="{{ $total }}">
+      <input type="hidden" id="customTotal" name="customTotal" value="0">
 
-        <div class="flex justify-between mt-6 text-lg font-bold text-green-700">
-            <span>মোট</span>
-            <span id="cartTotal">৳{{ $total }} <span class="text-sm text-gray-600 mb-1">+ ডেলিভারি চার্জ</span></span>
-        </div>
-        <p class="text-sm text-red-500 mt-3 text-right">ডেলিভারি চার্জঃ আপনার বাড়ি থেকে বাজারের দূরত্ব, ভেন বা অটোরিকশার ভাড়ার সমান।</p>
+      <div class="flex justify-between mt-6 text-sm sm:text-lg font-bold text-green-700">
+        <span>মোট</span>
+        <span id="cartTotal">৳{{ $total }} 
+          <span class="text-sm text-gray-600">+ ডেলিভারি চার্জ</span>
+        </span>
+      </div>
+      <p class="text-sm text-red-500 mt-2 text-right">
+        ডেলিভারি চার্জঃ আপনার বাড়ি থেকে বাজারের দূরত্ব, ভেন বা অটোরিকশার ভাড়ার সমান।
+      </p>
     </div>
 
-    <div class="bg-white rounded-2xl shadow p-6">
-        <h3 class="text-xl font-semibold text-gray-700 mb-4">ডেলিভারি তথ্য</h3>
+    <!-- 🚚 Delivery Info -->
+    <div class="bg-white rounded-2xl shadow p-4 sm:p-6">
+      <h3 class="text-sm sm:text-lg font-semibold text-gray-700 mb-4">ডেলিভারি তথ্য</h3>
 
+      <div class="space-y-3">
+        <div>
+          <label class="text-sm text-gray-600 mb-1 block">আপনার নাম</label>
+          <input type="text" name="name" value="{{ $user->name }}"
+              class="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-400 outline-none" readonly>
+        </div>
 
+        <div>
+          <label class="text-sm text-gray-600 mb-1 block">পিতার নাম</label>
+          <input type="text" name="father_name" value="{{ $user->father_name }}"
+              class="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-400 outline-none" readonly>
+        </div>
 
-            <!-- Name -->
-            <div class="flex flex-col">
-                <label for="name" class="text-sm text-gray-600 mb-1">আপনার নাম</label>
-                <input type="text" name="name" id="name" value="{{ $user->name }}"
-                    class="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-400 outline-none" readonly>
-            </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="newAddress" class="form-checkbox h-5 w-5 text-green-600">
+          <label for="newAddress" class="text-sm text-gray-700">নতুন ঠিকানা যোগ করুন</label>
+        </div>
 
-            <!-- Father's Name -->
-            <div class="flex flex-col">
-                <label for="father_name" class="text-sm text-gray-600 mb-1">পিতার নাম</label>
-                <input type="text" name="father_name" id="father_name" value="{{ $user->father_name }}"
-                    class="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-400 outline-none" readonly>
-            </div>
+        <div>
+          <label class="text-sm text-gray-600 mb-1 block">ঠিকানা</label>
+          <input type="text" name="address" id="addressInput" value="{{ $user->address }}"
+              class="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-400 outline-none" readonly>
+        </div>
 
-            <!-- New Address Checkbox -->
-            <div class="flex items-center gap-2">
-                <input type="checkbox" id="newAddress" class="form-checkbox h-5 w-5 text-green-600">
-                <label for="newAddress" class="text-sm text-gray-700">নতুন ঠিকানা যোগ করুন</label>
-            </div>
+        <div>
+          <label class="text-sm text-gray-600 mb-1 block">মোবাইল নম্বর</label>
+          <input type="tel" name="phone" id="phoneInput" value="{{ $user->phone }}"
+              class="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-400 outline-none" readonly>
+        </div>
+      </div>
 
-            <!-- Address -->
-            <div class="flex flex-col">
-                <label for="addressInput" class="text-sm text-gray-600 mb-1">ঠিকানা</label>
-                <input type="text" name="address" id="addressInput" value="{{ $user->address }}"
-                    class="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-400 outline-none"
-                    placeholder="ঠিকানা" readonly>
-            </div>
-
-            <!-- Phone -->
-            <div class="flex flex-col">
-                <label for="phoneInput" class="text-sm text-gray-600 mb-1">মোবাইল নম্বর</label>
-                <input type="tel" name="phone" id="phoneInput" value="{{ $user->phone }}"
-                    class="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-400 outline-none"
-                    placeholder="মোবাইল নম্বর" readonly>
-            </div>
-
-
-
-            <button type="submit"
-                class="bg-green-600 text-white w-full py-3 rounded-lg hover:bg-green-700 transition font-semibold">
-                ✅ অর্ডার কনফার্ম করুন
-            </button>
-
+      <button type="submit"
+          class="bg-green-600 text-white w-full py-3 rounded-lg text-sm sm:text-lg hover:bg-green-700 mt-5 transition font-semibold">
+        ✅ অর্ডার কনফার্ম করুন
+      </button>
     </div>
-            </form>
-        <!-- ✅ Form ends -->
-    @else
-    <p class="text-center text-gray-500">আপনার কার্ট খালি।</p>
-    @endif
+  </form>
+  @else
+  <p class="text-center text-sm sm:text-lg text-gray-500">আপনার কার্ট খালি।</p>
+  @endif
 </section>
 
 
@@ -188,7 +197,7 @@ function changeQty(btn, type) {
                 item.querySelector('.itemTotal').innerText = `৳${data.itemTotal}`;
                 document.getElementById('baseTotal').value = data.cartTotal; // update hidden baseTotal
                 updateGrandTotal();
-                showToast('success', 'Updated', 'পরিমাণ আপডেট হয়েছে ✅');
+                showToast('success', 'Updated', '✅ পরিমাণ আপডেট হয়েছে');
             } else {
                 showToast('error', 'Failed', 'আপডেট ব্যর্থ হয়েছে ❌');
             }

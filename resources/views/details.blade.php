@@ -82,19 +82,19 @@
           <img src="{{ url('uploads/products/'.$item->image) }}" alt="{{ $item->name }}" class="w-16 sm:w-20 h-16 sm:h-20 rounded-lg object-cover flex-shrink-0">
           <div class="flex flex-col justify-between w-full">
             <div>
-              <h4 class="font-semibold text-gray-800 text-sm sm:text-base">{{ $item->name }}</h4>
+              <h4 class="font-semibold text-gray-800 text-sm sm:text-lg">{{ $item->name }}</h4>
               <p class="text-green-600 font-medium text-xs sm:text-sm">৳{{ bnNum($item->price) }} / {{ $item->unit }}</p>
               <p class="text-xs text-gray-500">বাজার: {{ optional($item->bazar)->name ?? 'N/A' }}</p>
             </div>
             <div class="flex justify-between items-center mt-2">
-              <button class="addToCartBtn bg-indigo-600 hover:bg-indigo-700 text-xs sm:text-sm text-white py-1 px-2 sm:px-3 rounded-lg"
+              <button class="addToCartBtn bg-indigo-600 hover:bg-indigo-700 text-sm sm:text-lg sm:text-sm text-white py-1 px-2 sm:px-3 rounded-lg"
                       data-id="{{ $item->id }}"
                       data-name="{{ $item->name }}"
                       data-price="{{ $item->price }}"
                       data-image="{{ url('uploads/products/'.$item->image) }}">
                 🛒 যোগ করুন
               </button>
-              <a href="{{ route('home.product.details', $item->id) }}" class="text-xs sm:text-sm bg-green-600 text-white py-1 px-2 rounded-lg hover:bg-green-700 transition text-center">
+              <a href="{{ route('home.product.details', $item->id) }}" class="text-sm sm:text-lg sm:text-sm bg-green-600 text-white py-1 px-2 rounded-lg hover:bg-green-700 transition text-center">
                 বিস্তারিত
               </a>
             </div>
@@ -114,7 +114,7 @@
     <a href="#" class="text-xs sm:text-sm text-green-600 hover:underline">সব দেখুন →</a>
   </div>
 
-  <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
     @forelse($relatedProducts as $product)
       <div class="bg-white rounded-xl shadow hover:shadow-lg transition p-3 sm:p-4 relative group">
         <img src="{{ $product->image ? url('uploads/products/'.$product->image) : url('public/default/img.jpg') }}" 
@@ -123,17 +123,17 @@
         <button class="absolute top-2 right-2 bg-white p-1 sm:p-2 rounded-full shadow hover:text-red-500">❤️</button>
         <div class="mt-3 sm:mt-4">
           <h4 class="font-bold text-sm sm:text-lg">{{ $product->name }}</h4>
-          <p class="text-green-600 font-semibold text-xs sm:text-sm">৳{{ bnNum($product->price) }} / {{ $product->unit }}</p>
-          <p class="text-xs sm:text-sm text-gray-500">বাজার: {{ optional($product->bazar)->name ?? 'N/A' }}</p>
+          <p class="text-green-600 font-semibold text-sm sm:text-lg sm:text-sm">৳{{ bnNum($product->price) }} / {{ $product->unit }}</p>
+          <p class="text-sm sm:text-lg sm:text-sm text-gray-500">বাজার: {{ optional($product->bazar)->name ?? 'N/A' }}</p>
           <div class="flex justify-between items-center mt-2">
-            <button class="addToCartBtn bg-indigo-600 hover:bg-indigo-700 text-xs sm:text-sm text-white py-1 px-2 rounded-lg"
+            <button class="addToCartBtn bg-indigo-600 hover:bg-indigo-700 text-sm sm:text-lg sm:text-sm text-white py-1 px-2 rounded-lg"
                     data-id="{{ $product->id }}"
                     data-name="{{ $product->name }}"
                     data-price="{{ $product->price }}"
                     data-image="{{ url('uploads/products/'.$product->image) }}">
               🛒 যোগ করুন
             </button>
-            <a href="{{ route('home.product.details', $product->id) }}" class="text-xs sm:text-sm bg-green-600 text-white py-1 px-2 rounded-lg hover:bg-green-700 transition text-center">
+            <a href="{{ route('home.product.details', $product->id) }}" class="text-sm sm:text-lg sm:text-sm bg-green-600 text-white py-1 px-2 rounded-lg hover:bg-green-700 transition text-center">
               বিস্তারিত
             </a>
           </div>

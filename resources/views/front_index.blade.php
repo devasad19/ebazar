@@ -81,8 +81,8 @@
           ❤️
         </button>
         <div class="mt-4">
-           <a href="{{ route('home.product.details', $product->id) }}"  class="font-bold text-lg">{{ $product->name }}</a>
-          <p class="text-green-600 font-semibold">৳{{ bnNum($product->price) }} / {{ $product->unit }}</p>
+           <a href="{{ route('home.product.details', $product->id) }}"  class="font-bold text-sm sm:text-lg">{{ $product->name }}</a>
+          <p class="text-green-600 text-lg font-semibold">৳{{ bnNum($product->price) }} / {{ $product->unit }}</p>
           <!-- <p class="text-sm text-gray-500">
             বিতরণকারী: 
             {{ optional($product->rider)->name ?? 'N/A' }}
@@ -91,14 +91,14 @@
             বাজার:  {{ optional($product->bazar)->name ?? 'N/A' }}
           </p>
           <div class="flex justify-between items-center">
-              <button class="addToCartBtn inline-block bg-indigo-600 hover:bg-indigo-700 text-sm text-white py-2 px-3 rounded-lg text-sm"
+              <button class="addToCartBtn inline-block bg-indigo-600 hover:bg-indigo-700 text-sm text-white py-1 px-2 sm:py-2 sm:px-3 rounded-lg text-sm"
                     data-id="{{ $product->id }}"
                     data-name="{{ $product->name }}"
                     data-price="{{ $product->price }}"
                     data-image="{{ url('uploads/products/'.$product->image) }}">
               🛒 ব্যাগে যোগ করুন
             </button>
-            <a href="{{ route('home.product.details', $product->id) }}"  class="inline-block text-sm bg-green-600 text-white py-2 px-3 rounded-lg hover:bg-green-700 transition text-center">
+            <a href="{{ route('home.product.details', $product->id) }}"  class="inline-block text-sm bg-green-600 text-white py-1 px-2 sm:py-2 sm:px-3 rounded-lg hover:bg-green-700 transition text-center">
               বিস্তারিত </a>
         </div>
         </div>

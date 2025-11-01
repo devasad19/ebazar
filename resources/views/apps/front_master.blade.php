@@ -12,77 +12,47 @@
 </head>
 <body class="bg-gray-50 text-gray-800">
 
-<!-- 🔝 Navbar -->
-<header class="bg-white shadow-md sticky top-0 z-50">
-  <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-
-    <!-- 🌿 Logo --> 
-    
-<!-- 🌿 Logo -->
-    <a href="{{ route('front_home') }}" class="flex items-center space-x-2">
-      <img src="{{ url('public/default/new-logo.png') }}" alt="ই-বাজার" class="h-20 w-auto">
-      <!-- <span class="text-2xl font-bold text-green-700">ই-বাজার</span> -->
-    </a>
+<!-- 🔝 Desktop Navbar -->
+<!-- 🔝 Desktop Navbar -->
  
 
+<!-- 📱 Mobile App-Style Bottom Navbar -->
+<!-- 🔝 Desktop Navbar -->
+<header class="bg-white shadow-md sticky top-0 z-50 hidden md:block">
+  <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
 
-
-<!-- 🧭 Main Navigation -->
-<nav id="mobileMenu"
-     class="max-h-0 overflow-hidden transition-all mt-3 duration-500 ease-in-out 
-            md:max-h-none md:flex md:items-center md:space-x-6
-            md:static absolute bg-white w-full md:w-auto left-0 top-[64px] md:top-auto 
-            border-b md:border-none shadow md:shadow-none 
-            flex-col md:flex-row text-sm font-medium md:bg-transparent z-40">
-
-  @php
-      $routes = [
-          ['name' => 'হোম', 'route' => route('front_home')],
-          ['name' => 'বাজার', 'route' => route('our.bazars')],
-          ['name' => 'আমাদের নীতিমালা', 'route' => route('our.policy')],
-          ['name' => 'যোগাযোগ', 'route' => route('contact_us')],
-      ];
-      $current = url()->current();
-  @endphp
-
-  @foreach($routes as $item)
-    <a href="{{ $item['route'] }}"
-       class="relative block px-4 py-2 md:px-3 md:py-2 mt-1 md:mt-0
-              text-gray-700 hover:text-green-700 transition font-medium
-              group {{ $current == $item['route'] ? 'text-green-700' : '' }}">
-       
-       {{ $item['name'] }}
-
-       <!-- underline animation -->
-       <span class="absolute left-0 bottom-0 w-0 h-[2px] bg-green-600 transition-all duration-300 group-hover:w-full {{ $current == $item['route'] ? 'w-full' : '' }}"></span>
+    <!-- 🌿 Logo -->
+    <a href="{{ route('front_home') }}" class="flex items-center space-x-2">
+      <img src="{{ url('public/default/new-logo.png') }}" alt="ই-বাজার" class="h-16 w-auto">
     </a>
-  @endforeach
 
-  <!-- 👇 Mobile view: Auth buttons -->
-  <div class="flex flex-col gap-2 md:hidden border-t pt-3 mt-3 w-full">
-    @guest
-      <a href="{{ route('login') }}" 
-         class="bg-green-600 text-white text-center px-5 py-2 rounded-lg hover:bg-green-700 transition text-sm">
-         লগইন / রেজিস্টার
-      </a>
-      <a href="{{ route('rider.register') }}" 
-         class="bg-indigo-600 text-white text-center px-5 py-2 rounded-lg hover:bg-indigo-700 transition text-sm">
-         রাইডার নিবন্ধন
-      </a>
-    @endguest
-  </div>
-</nav>
+    <!-- 🧭 Main Navigation -->
+    <nav class="flex items-center space-x-6 text-sm font-medium">
+      @php
+          $routes = [
+              ['name' => 'হোম', 'route' => route('front_home')],
+              ['name' => 'বাজার', 'route' => route('our.bazars')],
+              ['name' => 'আমাদের নীতিমালা', 'route' => route('our.policy')],
+              ['name' => 'যোগাযোগ', 'route' => route('contact_us')],
+          ];
+          $current = url()->current();
+      @endphp
 
-
-
+      @foreach($routes as $item)
+        <a href="{{ $item['route'] }}"
+           class="relative px-3 py-2 text-gray-700 hover:text-green-700 transition font-medium group {{ $current == $item['route'] ? 'text-green-700' : '' }}">
+          {{ $item['name'] }}
+          <span class="absolute left-0 bottom-0 w-0 h-[2px] bg-green-600 transition-all duration-300 group-hover:w-full {{ $current == $item['route'] ? 'w-full' : '' }}"></span>
+        </a>
+      @endforeach
+    </nav>
 
     <!-- 🎯 Right Section -->
     <div class="flex items-center gap-3">
       @auth
-        <!-- Profile Dropdown -->
         <div class="relative" x-data="{ open: false }">
           <button @click="open = !open" class="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-lg hover:bg-gray-200 transition">
-            <img src="{{ auth()->user()->photo ? url('uploads/users/' . auth()->user()->photo) : url('public/default/user.jpg') }}" 
+            <img src="{{ auth()->user()->photo ? url('uploads/users/' . auth()->user()->photo) : url('public/default/user.jpg') }}"
                  class="w-8 h-8 rounded-full object-cover" alt="profile">
             <div class="flex flex-col items-start">
               <span class="text-sm font-medium">{{ auth()->user()->name }}</span>
@@ -90,14 +60,12 @@
             </div>
           </button>
 
-          <!-- Dropdown Menu -->
           <div x-show="open" @click.outside="open = false"
                class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg py-2 z-50">
             <a href="{{ auth()->user()->role->name }}/dashboard" class="block px-4 py-2 text-sm hover:bg-gray-100">ড্যাশবোর্ড</a>
             @if (auth()->user()->role->name == 'user')
               <a href="user/dashboard/my-orders" class="block px-4 py-2 text-sm hover:bg-gray-100">আমার অর্ডার</a>
             @endif
-
             <form method="POST" action="{{ route('logout') }}">
               @csrf
               <button type="submit" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
@@ -107,27 +75,105 @@
           </div>
         </div>
       @else
-        <a href="{{ route('login') }}" class="hidden md:inline bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition text-sm">
+        <a href="{{ route('login') }}" class="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition text-sm">
           লগইন / রেজিস্টার
         </a>
-        <a href="{{ route('rider.register') }}" class="hidden md:inline bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 transition text-sm">
+        <a href="{{ route('rider.register') }}" class="bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 transition text-sm">
           রাইডার নিবন্ধন
         </a>
       @endauth
 
-      <!-- 🛒 Cart Button (সব ভিউতে visible) -->
-      <button id="cartButton" class="relative bg-green-600 text-white px-1 py-1 rounded-lg hover:bg-green-700 transition">
+      <!-- 🛒 Cart -->
+      <button id="cartButtonHeader" class="relative bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition text-sm">
         🛒 ব্যাগ
-        <span id="cartCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">0</span>
+        <span id="cartCountHeader" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">0</span>
       </button>
-
-          <!-- 📱 Mobile Menu Toggle -->
-    <button id="menuToggle" class="md:hidden text-2xl text-gray-700 ml-2 focus:outline-none">
-      ☰
-    </button>
     </div>
   </div>
 </header>
+
+<!-- 📱 Mobile App-Style Bottom Navbar -->
+<!-- 🌈 Modern Colorful Mobile Bottom Navbar -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-xl z-50 md:hidden">
+  <div class="flex justify-around items-center py-2">
+
+    <!-- 🏠 হোম -->
+    <a href="{{ route('front_home') }}" 
+       class="flex flex-col items-center group transition-all duration-300">
+      <div class="w-9 h-9 flex items-center justify-center rounded-full 
+                  {{ request()->routeIs('front_home') ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600' }}
+                  group-hover:bg-green-100 group-hover:text-green-600">
+        🏡
+      </div>
+      <span class="text-xs mt-1 font-medium 
+                   {{ request()->routeIs('front_home') ? 'text-green-600' : 'text-gray-700' }}">
+        হোম
+      </span>
+    </a>
+
+    <!-- 🛍️ বাজার -->
+    <a href="{{ route('our.bazars') }}" 
+       class="flex flex-col items-center group transition-all duration-300">
+      <div class="w-9 h-9 flex items-center justify-center rounded-full 
+                  {{ request()->routeIs('our.bazars') ? 'bg-pink-100 text-pink-600' : 'bg-gray-100 text-gray-600' }}
+                  group-hover:bg-pink-100 group-hover:text-pink-600">
+        🛍️
+      </div>
+      <span class="text-xs mt-1 font-medium 
+                   {{ request()->routeIs('our.bazars') ? 'text-pink-600' : 'text-gray-700' }}">
+        বাজার
+      </span>
+    </a>
+
+    <!-- 🎒 ব্যাগ (Middle, Bigger Icon) -->
+<!-- 🎒 ব্যাগ (Middle, Bigger Icon with SVG Bag) -->
+<button id="cartButtonBottom" 
+        class="relative -mt-8 flex flex-col items-center group transition-all duration-300">
+  <div class="w-16 h-16 flex items-center justify-center rounded-full bg-white text-white border-4 border-green-200 shadow-lg group-hover:bg-green-200">
+    <!-- 🛍️ SVG Bag Icon -->
+            <img class="w-16 h-16 p-3 items-center group transition-all" src="{{ url('public/default/bag.svg') }}" alt="">
+  </div>
+  <span class="text-xs mt-1 text-green-600 font-semibold">ব্যাগ</span>
+  <span id="cartCountBottom" 
+        class="absolute top-0 right-4 bg-red-500 text-white text-[13px] font-bold w-5 h-5 flex items-center justify-center rounded-full">3</span>
+</button>
+
+
+
+    <!-- 📜 নীতিমালা -->
+    <a href="{{ route('our.policy') }}" 
+       class="flex flex-col items-center group transition-all duration-300">
+      <div class="w-9 h-9 flex items-center justify-center rounded-full 
+                  {{ request()->routeIs('our.policy') ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600' }}
+                  group-hover:bg-blue-100 group-hover:text-blue-600">
+        📜
+      </div>
+      <span class="text-xs mt-1 font-medium 
+                   {{ request()->routeIs('our.policy') ? 'text-blue-600' : 'text-gray-700' }}">
+        নীতিমালা
+      </span>
+    </a>
+
+    <!-- ☎️ যোগাযোগ -->
+    <a href="{{ route('contact_us') }}" 
+       class="flex flex-col items-center group transition-all duration-300">
+      <div class="w-9 h-9 flex items-center justify-center rounded-full 
+                  {{ request()->routeIs('contact_us') ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100 text-gray-600' }}
+                  group-hover:bg-yellow-100 group-hover:text-yellow-600">
+        ☎️
+      </div>
+      <span class="text-xs mt-1 font-medium 
+                   {{ request()->routeIs('contact_us') ? 'text-yellow-600' : 'text-gray-700' }}">
+        যোগাযোগ
+      </span>
+    </a>
+
+  </div>
+</nav>
+
+
+
+
 
 
 
@@ -136,29 +182,49 @@
  
 
   <!-- 🛍️ Cart Modal -->
-<div id="cartModal" class="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center opacity-0 pointer-events-none transition-opacity duration-300 z-50">
-  <div class="bg-white w-96 rounded-2xl shadow-lg p-5 relative">
-    <h3 class="text-xl font-bold text-green-700 mb-4">🛒 আপনার বাজার ব্যাগ</h3>
-
-    <div id="cartItems" class="space-y-3 max-h-60 overflow-y-auto">
-      <!-- JS দিয়ে কার্ট আইটেম এখানে আসবে -->
+<!-- 🛍️ Mobile App Style Cart Modal -->
+<div id="cartModal" 
+     class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-end md:items-center opacity-0 pointer-events-none transition-opacity duration-300 z-50">
+  
+  <div class="bg-white w-full md:w-96 h-3/4 md:h-auto rounded-t-2xl md:rounded-2xl shadow-xl p-5 relative flex flex-col">
+    
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-4 border-b pb-2">
+      <h3 class="text-lg md:text-xl font-bold text-green-700">🛒 আপনার বাজার ব্যাগ</h3>
+      <button id="closeCart" 
+              class="bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1 rounded-lg text-sm font-semibold transition">
+        ✕
+      </button>
     </div>
 
-    <div class="border-t pt-3 mt-4 flex justify-between items-center">
-      <p class="font-bold text-green-700">মোট: <span id="cartTotal">৳0</span></p>
-      <a href="{{ route('home.place.order') }}"
-         class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-         অর্ডার করুন
+    <!-- Cart Items -->
+    <div id="cartItems" class="flex-1 overflow-y-auto space-y-3 pb-3">
+      <!-- JS দিয়ে কার্ট আইটেম এখানে আসবে -->
+      <!-- প্রতিটি আইটেম কার্ডের মতো দেখানো হবে -->
+      <!-- উদাহরণ: -->
+      <!--
+      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl shadow-sm">
+        <img src="..." alt="পণ্য" class="w-16 h-16 rounded-lg object-cover">
+        <div class="flex-1 mx-3">
+          <p class="font-semibold text-gray-800 text-sm">পণ্যের নাম</p>
+          <p class="text-green-600 font-bold text-sm">৳200 x 2</p>
+        </div>
+        <p class="font-semibold text-gray-700">৳400</p>
+      </div>
+      -->
+    </div>
+
+    <!-- Footer / Total & Checkout -->
+    <div class="border-t pt-3 mt-3 flex flex-col md:flex-row justify-between items-center gap-3">
+      <p class="font-bold text-green-700 text-lg">মোট: <span id="cartTotal">৳0</span></p>
+      <a href="{{ route('home.place.order') }}" 
+         class="w-full md:w-auto bg-green-600 text-white text-center px-5 py-3 rounded-lg hover:bg-green-700 transition font-semibold">
+        অর্ডার করুন
       </a>
     </div>
-
-    <!-- 🔘 বন্ধ বাটন -->
-    <button id="closeCart"
-      class="absolute top-4 right-3 bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1 rounded-lg text-sm font-semibold transition">
-      বন্ধ
-    </button>
   </div>
 </div>
+
 
 
 
@@ -170,8 +236,7 @@
       <a href="{{ route('privacy-policy') }}" class="text-sm text-green-400 hover:text-green-300">প্রাইভেসি পলিসি</a>
     </p>
   </footer>
-
-
+ 
 
 
 
@@ -185,20 +250,20 @@
 
 <!-- 📜 JS for Mobile Menu (Smooth Animation) -->
 <script>
-const menuToggle = document.getElementById('menuToggle');
-const mobileMenu = document.getElementById('mobileMenu');
-let isOpen = false;
+// const menuToggle = document.getElementById('menuToggle');
+// const mobileMenu = document.getElementById('mobileMenu');
+// let isOpen = false;
 
-menuToggle.addEventListener('click', () => {
-  isOpen = !isOpen;
-  if (isOpen) {
-    mobileMenu.classList.remove('max-h-0');
-    mobileMenu.classList.add('max-h-[500px]');
-  } else {
-    mobileMenu.classList.remove('max-h-[500px]');
-    mobileMenu.classList.add('max-h-0');
-  }
-});
+// menuToggle.addEventListener('click', () => {
+//   isOpen = !isOpen;
+//   if (isOpen) {
+//     mobileMenu.classList.remove('max-h-0');
+//     mobileMenu.classList.add('max-h-[500px]');
+//   } else {
+//     mobileMenu.classList.remove('max-h-[500px]');
+//     mobileMenu.classList.add('max-h-0');
+//   }
+// });
 </script>
 
 
@@ -359,7 +424,7 @@ async function renderCart() {
   try {
     const response = await fetch('{{ route("cart.fetch") }}');
     const data = await response.json();
-    document.getElementById('cartCount').textContent = data.count || 0;
+    updateCartCount();
 
     // যদি session খালি বা DB তে কিছু না থাকে
     if (!data.items || (Array.isArray(data.items) && !data.items.length) || Object.keys(data.items).length === 0) {
@@ -483,7 +548,14 @@ async function updateCartCount() {
   try {
     const res = await fetch('{{ route("cart.count") }}');
     const data = await res.json();
-    document.getElementById('cartCount').textContent = data.count ?? 0;
+    // document.getElementById('cartCount').textContent = data.count ?? 0;
+
+  document.querySelectorAll('#cartCountHeader, #cartCountBottom').forEach(el => {
+    el.textContent = data.count ?? 0;
+  });
+
+
+
   } catch (error) {
     console.error('Cart count update failed:', error);
   }
@@ -491,13 +563,19 @@ async function updateCartCount() {
 
 
 // ✅ Modal Controls
-const cartButton = document.getElementById("cartButton");
+// ✅ Cart Modal Controls
+const cartButtons = [
+  document.getElementById("cartButtonHeader"),
+  document.getElementById("cartButtonBottom")
+];
 const cartModal = document.getElementById("cartModal");
 const closeCart = document.getElementById("closeCart");
 
-cartButton?.addEventListener("click", () => {
-  cartModal.classList.remove("opacity-0", "pointer-events-none");
-  renderCart();
+cartButtons.forEach((btn) => {
+  btn?.addEventListener("click", () => {
+    cartModal.classList.remove("opacity-0", "pointer-events-none");
+    renderCart(); // 🧩 আপনার render function
+  });
 });
 
 closeCart?.addEventListener("click", () => {
@@ -510,19 +588,22 @@ window.addEventListener("click", (e) => {
   }
 });
 
+ 
 
-// ✅ Quantity Increase / Decrease
 function increaseQty(btn) {
   const input = btn.previousElementSibling;
   input.value = parseInt(input.value) + 1;
+  
 }
 
 function decreaseQty(btn) {
   const input = btn.nextElementSibling;
   if (parseInt(input.value) > 1) {
     input.value = parseInt(input.value) - 1;
+    
   }
 }
+
 </script>
 
 
